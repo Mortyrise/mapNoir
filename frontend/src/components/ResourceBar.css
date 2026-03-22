@@ -1,0 +1,71 @@
+.resource-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--noir-surface);
+  border-bottom: 1px solid var(--noir-border);
+  height: var(--header-height);
+  user-select: none;
+}
+
+.resource-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.resource-icon {
+  color: var(--amber);
+  flex-shrink: 0;
+}
+
+/* -- Energy pips -- */
+.energy-pips {
+  display: flex;
+  gap: 4px;
+}
+
+.pip {
+  width: 22px;
+  height: 8px;
+  border-radius: 2px;
+  transition: all 0.35s var(--ease-out);
+}
+
+.pip--active {
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber-glow);
+}
+
+.pip--spent {
+  background: var(--noir-border);
+}
+
+/* -- Timer -- */
+.timer-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--noir-heading);
+  min-width: 3.2em;
+  text-align: right;
+}
+
+.resource-timer--overtime .timer-value {
+  color: var(--red);
+}
+
+.resource-timer--overtime .resource-icon {
+  color: var(--red);
+}
+
+.overtime-icon {
+  color: var(--red);
+  animation: pulse-danger 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse-danger {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
