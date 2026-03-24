@@ -1,0 +1,28 @@
+{
+  "name": "mapnoir",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Map Noir — Last Known Location",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "npm -w client run dev",
+    "dev:server": "npm -w server run dev",
+    "build": "npm -w client run build && npm -w server run build",
+    "build:client": "npm -w client run build",
+    "build:server": "npm -w server run build"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mortyrise/mapNoir.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

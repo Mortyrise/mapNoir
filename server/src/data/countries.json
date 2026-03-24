@@ -1,0 +1,682 @@
+{
+  "ES": {
+    "code": "ES",
+    "name": "Spain",
+    "languages": ["es", "ca", "gl", "eu"],
+    "driving": "right",
+    "climate": ["mediterranean", "semiarid", "oceanic"],
+    "currency": "EUR",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "capital": "Madrid",
+    "boundingBox": {
+      "north": 43.79,
+      "south": 36.00,
+      "east": 4.33,
+      "west": -9.30
+    }
+  },
+  "FR": {
+    "code": "FR",
+    "name": "France",
+    "languages": ["fr"],
+    "driving": "right",
+    "climate": ["oceanic", "mediterranean", "continental"],
+    "currency": "EUR",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "capital": "Paris",
+    "boundingBox": {
+      "north": 51.09,
+      "south": 42.33,
+      "east": 8.23,
+      "west": -4.79
+    }
+  },
+  "DE": {
+    "code": "DE",
+    "name": "Germany",
+    "languages": ["de"],
+    "driving": "right",
+    "climate": ["oceanic", "continental"],
+    "currency": "EUR",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "capital": "Berlin",
+    "boundingBox": {
+      "north": 55.06,
+      "south": 47.27,
+      "east": 15.04,
+      "west": 5.87
+    }
+  },
+  "IT": {
+    "code": "IT",
+    "name": "Italy",
+    "languages": ["it"],
+    "driving": "right",
+    "climate": ["mediterranean", "continental", "subtropical"],
+    "currency": "EUR",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "capital": "Rome",
+    "boundingBox": {
+      "north": 47.09,
+      "south": 36.64,
+      "east": 18.52,
+      "west": 6.63
+    }
+  },
+  "GB": {
+    "code": "GB",
+    "name": "United Kingdom",
+    "languages": ["en", "cy", "gd"],
+    "driving": "left",
+    "climate": ["oceanic"],
+    "currency": "GBP",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "capital": "London",
+    "boundingBox": {
+      "north": 60.86,
+      "south": 49.96,
+      "east": 1.76,
+      "west": -8.65
+    }
+  },
+  "PT": {
+    "code": "PT",
+    "name": "Portugal",
+    "languages": ["pt"],
+    "driving": "right",
+    "climate": ["mediterranean", "oceanic"],
+    "currency": "EUR",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "capital": "Lisbon",
+    "boundingBox": {
+      "north": 42.15,
+      "south": 36.96,
+      "east": -6.19,
+      "west": -9.50
+    }
+  },
+  "NL": {
+    "code": "NL",
+    "name": "Netherlands",
+    "languages": ["nl", "fy"],
+    "driving": "right",
+    "climate": ["oceanic"],
+    "currency": "EUR",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "capital": "Amsterdam",
+    "boundingBox": {
+      "north": 53.51,
+      "south": 50.75,
+      "east": 7.21,
+      "west": 3.36
+    }
+  },
+  "BE": {
+    "code": "BE",
+    "name": "Belgium",
+    "languages": ["nl", "fr", "de"],
+    "driving": "right",
+    "climate": ["oceanic"],
+    "currency": "EUR",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "capital": "Brussels",
+    "boundingBox": {
+      "north": 51.50,
+      "south": 49.50,
+      "east": 6.40,
+      "west": 2.54
+    }
+  },
+  "SE": {
+    "code": "SE",
+    "name": "Sweden",
+    "languages": ["sv"],
+    "driving": "right",
+    "climate": ["continental", "subarctic", "oceanic"],
+    "currency": "SEK",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "capital": "Stockholm",
+    "boundingBox": {
+      "north": 69.06,
+      "south": 55.34,
+      "east": 24.17,
+      "west": 11.11
+    }
+  },
+  "NO": {
+    "code": "NO",
+    "name": "Norway",
+    "languages": ["no", "nb", "nn"],
+    "driving": "right",
+    "climate": ["oceanic", "subarctic", "continental"],
+    "currency": "NOK",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "capital": "Oslo",
+    "boundingBox": {
+      "north": 71.19,
+      "south": 57.97,
+      "east": 31.17,
+      "west": 4.65
+    }
+  },
+  "PL": {
+    "code": "PL",
+    "name": "Poland",
+    "languages": ["pl"],
+    "driving": "right",
+    "climate": ["continental", "oceanic"],
+    "currency": "PLN",
+    "region": "Europe",
+    "subregion": "Central Europe",
+    "capital": "Warsaw",
+    "boundingBox": {
+      "north": 54.84,
+      "south": 49.00,
+      "east": 24.15,
+      "west": 14.12
+    }
+  },
+  "CZ": {
+    "code": "CZ",
+    "name": "Czech Republic",
+    "languages": ["cs"],
+    "driving": "right",
+    "climate": ["continental", "oceanic"],
+    "currency": "CZK",
+    "region": "Europe",
+    "subregion": "Central Europe",
+    "capital": "Prague",
+    "boundingBox": {
+      "north": 51.06,
+      "south": 48.55,
+      "east": 18.86,
+      "west": 12.09
+    }
+  },
+  "AT": {
+    "code": "AT",
+    "name": "Austria",
+    "languages": ["de"],
+    "driving": "right",
+    "climate": ["continental", "oceanic"],
+    "currency": "EUR",
+    "region": "Europe",
+    "subregion": "Central Europe",
+    "capital": "Vienna",
+    "boundingBox": {
+      "north": 49.02,
+      "south": 46.37,
+      "east": 17.16,
+      "west": 9.53
+    }
+  },
+  "CH": {
+    "code": "CH",
+    "name": "Switzerland",
+    "languages": ["de", "fr", "it", "rm"],
+    "driving": "right",
+    "climate": ["continental", "oceanic"],
+    "currency": "CHF",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "capital": "Bern",
+    "boundingBox": {
+      "north": 47.81,
+      "south": 45.82,
+      "east": 10.49,
+      "west": 5.96
+    }
+  },
+  "GR": {
+    "code": "GR",
+    "name": "Greece",
+    "languages": ["el"],
+    "driving": "right",
+    "climate": ["mediterranean"],
+    "currency": "EUR",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "capital": "Athens",
+    "boundingBox": {
+      "north": 41.75,
+      "south": 34.80,
+      "east": 29.65,
+      "west": 19.37
+    }
+  },
+  "US": {
+    "code": "US",
+    "name": "United States",
+    "languages": ["en", "es"],
+    "driving": "right",
+    "climate": ["continental", "subtropical", "arid", "mediterranean", "oceanic", "tropical", "subarctic"],
+    "currency": "USD",
+    "region": "Americas",
+    "subregion": "Northern America",
+    "capital": "Washington, D.C.",
+    "boundingBox": {
+      "north": 71.39,
+      "south": 24.52,
+      "east": -66.95,
+      "west": -179.15
+    }
+  },
+  "CA": {
+    "code": "CA",
+    "name": "Canada",
+    "languages": ["en", "fr"],
+    "driving": "right",
+    "climate": ["continental", "subarctic", "oceanic"],
+    "currency": "CAD",
+    "region": "Americas",
+    "subregion": "Northern America",
+    "capital": "Ottawa",
+    "boundingBox": {
+      "north": 83.11,
+      "south": 41.68,
+      "east": -52.62,
+      "west": -141.00
+    }
+  },
+  "BR": {
+    "code": "BR",
+    "name": "Brazil",
+    "languages": ["pt"],
+    "driving": "right",
+    "climate": ["tropical", "subtropical", "semiarid"],
+    "currency": "BRL",
+    "region": "Americas",
+    "subregion": "South America",
+    "capital": "Brasilia",
+    "boundingBox": {
+      "north": 5.27,
+      "south": -33.75,
+      "east": -34.79,
+      "west": -73.99
+    }
+  },
+  "MX": {
+    "code": "MX",
+    "name": "Mexico",
+    "languages": ["es"],
+    "driving": "right",
+    "climate": ["tropical", "arid", "semiarid", "subtropical"],
+    "currency": "MXN",
+    "region": "Americas",
+    "subregion": "Central America",
+    "capital": "Mexico City",
+    "boundingBox": {
+      "north": 32.72,
+      "south": 14.53,
+      "east": -86.71,
+      "west": -118.40
+    }
+  },
+  "AR": {
+    "code": "AR",
+    "name": "Argentina",
+    "languages": ["es"],
+    "driving": "right",
+    "climate": ["subtropical", "temperate", "arid", "semiarid"],
+    "currency": "ARS",
+    "region": "Americas",
+    "subregion": "South America",
+    "capital": "Buenos Aires",
+    "boundingBox": {
+      "north": -21.78,
+      "south": -55.06,
+      "east": -53.64,
+      "west": -73.56
+    }
+  },
+  "CL": {
+    "code": "CL",
+    "name": "Chile",
+    "languages": ["es"],
+    "driving": "right",
+    "climate": ["arid", "mediterranean", "oceanic", "temperate"],
+    "currency": "CLP",
+    "region": "Americas",
+    "subregion": "South America",
+    "capital": "Santiago",
+    "boundingBox": {
+      "north": -17.50,
+      "south": -56.00,
+      "east": -66.42,
+      "west": -75.64
+    }
+  },
+  "CO": {
+    "code": "CO",
+    "name": "Colombia",
+    "languages": ["es"],
+    "driving": "right",
+    "climate": ["tropical", "subtropical"],
+    "currency": "COP",
+    "region": "Americas",
+    "subregion": "South America",
+    "capital": "Bogota",
+    "boundingBox": {
+      "north": 13.39,
+      "south": -4.23,
+      "east": -66.85,
+      "west": -81.73
+    }
+  },
+  "PE": {
+    "code": "PE",
+    "name": "Peru",
+    "languages": ["es", "qu", "ay"],
+    "driving": "right",
+    "climate": ["tropical", "arid", "temperate"],
+    "currency": "PEN",
+    "region": "Americas",
+    "subregion": "South America",
+    "capital": "Lima",
+    "boundingBox": {
+      "north": -0.04,
+      "south": -18.35,
+      "east": -68.65,
+      "west": -81.33
+    }
+  },
+  "JP": {
+    "code": "JP",
+    "name": "Japan",
+    "languages": ["ja"],
+    "driving": "left",
+    "climate": ["subtropical", "continental", "oceanic"],
+    "currency": "JPY",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "capital": "Tokyo",
+    "boundingBox": {
+      "north": 45.52,
+      "south": 24.25,
+      "east": 153.99,
+      "west": 122.93
+    }
+  },
+  "KR": {
+    "code": "KR",
+    "name": "South Korea",
+    "languages": ["ko"],
+    "driving": "right",
+    "climate": ["continental", "subtropical"],
+    "currency": "KRW",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "capital": "Seoul",
+    "boundingBox": {
+      "north": 38.62,
+      "south": 33.11,
+      "east": 131.87,
+      "west": 125.07
+    }
+  },
+  "TH": {
+    "code": "TH",
+    "name": "Thailand",
+    "languages": ["th"],
+    "driving": "left",
+    "climate": ["tropical"],
+    "currency": "THB",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "capital": "Bangkok",
+    "boundingBox": {
+      "north": 20.46,
+      "south": 5.61,
+      "east": 105.64,
+      "west": 97.35
+    }
+  },
+  "ID": {
+    "code": "ID",
+    "name": "Indonesia",
+    "languages": ["id"],
+    "driving": "left",
+    "climate": ["tropical"],
+    "currency": "IDR",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "capital": "Jakarta",
+    "boundingBox": {
+      "north": 5.91,
+      "south": -11.01,
+      "east": 141.02,
+      "west": 95.01
+    }
+  },
+  "IN": {
+    "code": "IN",
+    "name": "India",
+    "languages": ["hi", "en", "bn", "te", "mr", "ta", "ur"],
+    "driving": "left",
+    "climate": ["tropical", "subtropical", "arid", "semiarid"],
+    "currency": "INR",
+    "region": "Asia",
+    "subregion": "Southern Asia",
+    "capital": "New Delhi",
+    "boundingBox": {
+      "north": 35.50,
+      "south": 6.75,
+      "east": 97.40,
+      "west": 68.17
+    }
+  },
+  "PH": {
+    "code": "PH",
+    "name": "Philippines",
+    "languages": ["fil", "en"],
+    "driving": "right",
+    "climate": ["tropical"],
+    "currency": "PHP",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "capital": "Manila",
+    "boundingBox": {
+      "north": 21.12,
+      "south": 4.59,
+      "east": 126.60,
+      "west": 116.95
+    }
+  },
+  "MY": {
+    "code": "MY",
+    "name": "Malaysia",
+    "languages": ["ms", "en", "zh", "ta"],
+    "driving": "left",
+    "climate": ["tropical"],
+    "currency": "MYR",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "capital": "Kuala Lumpur",
+    "boundingBox": {
+      "north": 7.36,
+      "south": 0.85,
+      "east": 119.27,
+      "west": 99.64
+    }
+  },
+  "TW": {
+    "code": "TW",
+    "name": "Taiwan",
+    "languages": ["zh", "nan", "hak"],
+    "driving": "right",
+    "climate": ["subtropical", "tropical"],
+    "currency": "TWD",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "capital": "Taipei",
+    "boundingBox": {
+      "north": 25.30,
+      "south": 21.90,
+      "east": 122.01,
+      "west": 120.22
+    }
+  },
+  "ZA": {
+    "code": "ZA",
+    "name": "South Africa",
+    "languages": ["af", "en", "zu", "xh", "st", "tn"],
+    "driving": "left",
+    "climate": ["subtropical", "mediterranean", "semiarid"],
+    "currency": "ZAR",
+    "region": "Africa",
+    "subregion": "Southern Africa",
+    "capital": "Pretoria",
+    "boundingBox": {
+      "north": -22.13,
+      "south": -34.84,
+      "east": 32.89,
+      "west": 16.45
+    }
+  },
+  "KE": {
+    "code": "KE",
+    "name": "Kenya",
+    "languages": ["sw", "en"],
+    "driving": "left",
+    "climate": ["tropical", "arid", "semiarid"],
+    "currency": "KES",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "capital": "Nairobi",
+    "boundingBox": {
+      "north": 5.02,
+      "south": -4.68,
+      "east": 41.91,
+      "west": 33.91
+    }
+  },
+  "MA": {
+    "code": "MA",
+    "name": "Morocco",
+    "languages": ["ar", "ber", "fr"],
+    "driving": "right",
+    "climate": ["mediterranean", "arid", "semiarid"],
+    "currency": "MAD",
+    "region": "Africa",
+    "subregion": "Northern Africa",
+    "capital": "Rabat",
+    "boundingBox": {
+      "north": 35.93,
+      "south": 27.66,
+      "east": -1.01,
+      "west": -13.17
+    }
+  },
+  "NG": {
+    "code": "NG",
+    "name": "Nigeria",
+    "languages": ["en", "ha", "yo", "ig"],
+    "driving": "right",
+    "climate": ["tropical", "semiarid"],
+    "currency": "NGN",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "capital": "Abuja",
+    "boundingBox": {
+      "north": 13.89,
+      "south": 4.27,
+      "east": 14.68,
+      "west": 2.69
+    }
+  },
+  "AU": {
+    "code": "AU",
+    "name": "Australia",
+    "languages": ["en"],
+    "driving": "left",
+    "climate": ["arid", "tropical", "subtropical", "mediterranean", "temperate"],
+    "currency": "AUD",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "capital": "Canberra",
+    "boundingBox": {
+      "north": -10.06,
+      "south": -43.64,
+      "east": 153.64,
+      "west": 113.15
+    }
+  },
+  "NZ": {
+    "code": "NZ",
+    "name": "New Zealand",
+    "languages": ["en", "mi"],
+    "driving": "left",
+    "climate": ["oceanic", "temperate"],
+    "currency": "NZD",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "capital": "Wellington",
+    "boundingBox": {
+      "north": -34.39,
+      "south": -47.29,
+      "east": 178.55,
+      "west": 166.43
+    }
+  },
+  "TR": {
+    "code": "TR",
+    "name": "Turkey",
+    "languages": ["tr", "ku"],
+    "driving": "right",
+    "climate": ["mediterranean", "continental", "oceanic", "semiarid"],
+    "currency": "TRY",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "capital": "Ankara",
+    "boundingBox": {
+      "north": 42.11,
+      "south": 35.82,
+      "east": 44.79,
+      "west": 25.66
+    }
+  },
+  "IL": {
+    "code": "IL",
+    "name": "Israel",
+    "languages": ["he", "ar"],
+    "driving": "right",
+    "climate": ["mediterranean", "arid"],
+    "currency": "ILS",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "capital": "Jerusalem",
+    "boundingBox": {
+      "north": 33.33,
+      "south": 29.49,
+      "east": 35.88,
+      "west": 34.27
+    }
+  },
+  "AE": {
+    "code": "AE",
+    "name": "United Arab Emirates",
+    "languages": ["ar", "en"],
+    "driving": "right",
+    "climate": ["arid"],
+    "currency": "AED",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "capital": "Abu Dhabi",
+    "boundingBox": {
+      "north": 26.08,
+      "south": 22.63,
+      "east": 56.38,
+      "west": 51.58
+    }
+  }
+}

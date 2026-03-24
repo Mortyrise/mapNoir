@@ -6,7 +6,7 @@
 
 ## 🎯 Visión
 
-**Map Noir** es un juego web móvil de deducción geográfica con estética detective.
+**Map Noir** es un juego de deducción geográfica con un enbfoque detective.
 El jugador resuelve casos ubicando escenas reales en el mapa a partir de **pistas ambiguas, incompletas y no visibles en la imagen**.
 
 > No se trata de saber, sino de **decidir con incertidumbre**.
@@ -28,8 +28,8 @@ El jugador:
 
 ## 🔁 Core Loop
 
-1. Se presenta una escena (Street View o imagen)
-2. Se da contexto narrativo + 2–4 pistas abiertas
+1. Se presenta una escena Street View (goegussr like)
+2. Se da contexto narrativo + 1 pista abierta
 3. El jugador gestiona recursos (movimiento, consultas, tiempo)
 4. Decide una ubicación en el mapa
 5. Recibe puntuación + feedback visual
@@ -64,9 +64,8 @@ El jugador:
 ### Acciones
 
 * Moverse (Street View) → coste energía
-* Pedir pista → penaliza score
-* Consultar (sí/no) → coste medio
-* Apostar (x2 score) → riesgo alto
+* Pedir pista → penaliza score y energia
+* Apostar (x2 score) → riesgo alto consume energia
 
 👉 Decisiones irreversibles
 
@@ -90,21 +89,15 @@ Las pistas **no deben ser visibles directamente en la imagen**
 #### 🌍 Contextuales
 
 * “Zona turística europea”
-* “Región vinícola”
+* Quien nos dió la información recuerda que vio a gente con cajas de vinos -> Región vinícola”
 
 #### 🧭 Geopolíticas
 
 * “No es un país insular”
-* “Se conduce por la derecha”
 
 #### 📜 Narrativas
 
 * “El sospechoso cruzó una frontera cercana”
-
-#### ❌ Negativas (muy importantes)
-
-* “No es Asia”
-* “No es clima tropical”
 
 ---
 
@@ -145,7 +138,6 @@ Estructura simple por país/región:
 2. Obtener país (reverse geocoding)
 3. Enriquecer con dataset propio
 4. Generar:
-
    * 2 pistas externas
    * 1 pista narrativa
    * 1 pista negativa (opcional)
@@ -157,7 +149,7 @@ Estructura simple por país/región:
 
 **Fácil**
 
-* pistas fuertes (idioma, conducción)
+* pistas fuertes (idioma, moneda)
 
 **Media**
 
@@ -180,17 +172,13 @@ Estructura simple por país/región:
 
 ## 🧑‍🤝‍🧑 Modo social
 
-### 🔥 Crear reto
-
-* seleccionar ubicación
-* configurar reglas (tiempo, energía)
-* compartir link
+### 🔥 reto Diario
+### 🔥 Duelo con amigo
+### 🔥 Duelo con random
 
 ### 🏆 Ranking
 
-* mejor score
-* menos pistas usadas
-* más precisión
+* mejor score (el score depende de la distandcia final a la coordenada de la cantidad de pistas y tiempo)
 
 ---
 
@@ -200,7 +188,6 @@ Formato ligero por partida:
 
 > “Última localización conocida del sospechoso.
 > Un testigo afirma haber escuchado francés.
-> Se movía cerca de una frontera.”
 
 ---
 
@@ -230,16 +217,11 @@ Formato ligero por partida:
 
 * React + Vite
 * Mapa: Mapbox / Leaflet
-* UI rápida y mobile-first
+* UI rápida
 
 ### Backend
 
 * Node.js (Express o similar)
-* API:
-
-  * /game/generate
-  * /game/score
-  * /challenge/create
 
 ### Servicios
 
@@ -255,7 +237,7 @@ Formato ligero por partida:
 * sistema de score por distancia
 * pistas generadas automáticamente
 * recursos básicos
-* crear/compartir retos
+* crear/compartir duelos
 
 ---
 
