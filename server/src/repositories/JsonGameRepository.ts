@@ -28,7 +28,18 @@ export class JsonGameRepository implements GameRepository {
 
   async getRandomLocation(): Promise<Location> {
     const countries = await this.loadCountries()
-    const country = countries[Math.floor(Math.random() * countries.length)]
+
+    // Weight selection by coverage: high=6, medium=3, low=1
+    const weights = { high: 6, medium: 3, low: 1 }
+    const weighted: CountryData[] = []
+    for (const country of countries) {
+      const w = weights[country.mapillaryCoverage] || 1
+      for (let i = 0; i < w; i++) {
+        weighted.push(country)
+      }
+    }
+
+    const country = weighted[Math.floor(Math.random() * weighted.length)]
     const { north, south, east, west } = country.boundingBox
 
     const lat = south + Math.random() * (north - south)
@@ -38,6 +49,15 @@ export class JsonGameRepository implements GameRepository {
       lat: parseFloat(lat.toFixed(6)),
       lng: parseFloat(lng.toFixed(6)),
     }
+  }
+
+  async getRandomLocationInCountry(code: string): Promise<Location | null> {
+    const country = await this.getCountryData(code)
+    if (!country) return null
+    const { north, south, east, west } = country.boundingBox
+    const lat = south + Math.random() * (north - south)
+    const lng = west + Math.random() * (east - west)
+    return { lat: parseFloat(lat.toFixed(6)), lng: parseFloat(lng.toFixed(6)) }
   }
 
   async getCountryData(code: string): Promise<CountryData | null> {

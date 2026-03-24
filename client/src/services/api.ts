@@ -18,10 +18,22 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 export const api = {
   healthCheck: () => request<{ status: string }>('/health'),
 
-  newGame: (difficulty: string = 'medium') =>
-    request<{ gameId: string; imageId: string; thumbUrl: string }>('/game/new', {
+  newGame: () =>
+    request<{
+      gameId: string
+      imageId: string
+      thumbUrl: string
+      provider: 'mapillary' | 'google'
+      searchLat?: number
+      searchLng?: number
+    }>('/game/new', {
       method: 'POST',
-      body: JSON.stringify({ difficulty }),
+    }),
+
+  reportPanoLocation: (gameId: string, lat: number, lng: number) =>
+    request<{ ok: boolean }>('/game/report-pano', {
+      method: 'POST',
+      body: JSON.stringify({ gameId, lat, lng }),
     }),
 
   submitGuess: (gameId: string, lat: number, lng: number) =>

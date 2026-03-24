@@ -17,6 +17,9 @@ export function createGameRouter(controller: GameController): Router {
   // POST /api/game/new
   router.post('/new', controller.newGame)
 
+  // POST /api/game/report-pano
+  router.post('/report-pano', controller.reportPanoLocation)
+
   // POST /api/game/guess
   router.post('/guess', controller.submitGuess)
 

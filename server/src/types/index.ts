@@ -13,6 +13,7 @@ export interface CountryData {
   region: string
   subregion: string
   capital: string
+  mapillaryCoverage: 'high' | 'medium' | 'low'
   boundingBox: {
     north: number
     south: number

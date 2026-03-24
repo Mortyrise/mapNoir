@@ -125,7 +125,7 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
       <div
         ref={containerRef}
         className="game-map"
-        style={{ width: '100%', height: '100%', minHeight: '400px' }}
+        style={{ width: '100%', height: '100%' }}
       />
       {coords && !resultMarkers && (
         <div className="game-map-coords">

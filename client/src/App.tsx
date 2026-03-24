@@ -14,6 +14,9 @@ type GameState = 'idle' | 'playing' | 'result'
 interface GameData {
   gameId: string
   imageId: string
+  provider: 'mapillary' | 'google'
+  searchLat?: number
+  searchLng?: number
 }
 
 interface ResultData {
@@ -24,6 +27,7 @@ interface ResultData {
 }
 
 const MAPILLARY_TOKEN = import.meta.env.MAPILLARY_TOKEN || ''
+const GOOGLE_API_KEY = import.meta.env.GOOGLE_MAPS_API_KEY || ''
 
 function App() {
   const { theme, toggleTheme } = useTheme()
@@ -38,13 +42,22 @@ function App() {
     setLoading(true)
     setError(null)
     try {
-      const data = await api.newGame('medium')
-      setGameData({ gameId: data.gameId, imageId: data.imageId })
+      const data = await api.newGame()
+      setGameData({
+        gameId: data.gameId,
+        imageId: data.imageId,
+        provider: data.provider,
+        searchLat: data.searchLat,
+        searchLng: data.searchLng,
+      })
       setSelectedLocation(null)
       setResultData(null)
       setGameState('playing')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start game')
+      const msg = err instanceof Error ? err.message : 'Failed to start game'
+      setError(msg.includes('street-level')
+        ? 'Could not find a scene. Try again!'
+        : msg)
     } finally {
       setLoading(false)
     }
@@ -118,8 +131,13 @@ function App() {
           <div className="game-layout">
             <div className="scene-panel">
               <SceneViewer
+                provider={gameData.provider}
                 imageId={gameData.imageId}
-                accessToken={MAPILLARY_TOKEN}
+                mapillaryToken={MAPILLARY_TOKEN}
+                gameId={gameData.gameId}
+                lat={gameData.searchLat}
+                lng={gameData.searchLng}
+                googleApiKey={GOOGLE_API_KEY}
               />
             </div>
             <div className="map-panel">

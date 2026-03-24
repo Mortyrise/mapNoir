@@ -76,7 +76,6 @@ Una partida jugable de 1 ronda:
 | | Pros | Contras |
 |---|---|---|
 | **API v4 oficial** | Estable, legal, buena documentación | Necesita token (gratis), rate limits |
-| **Scraping** | Sin límites | Ilegal, inestable, pueden banearte |
 
 **Recomendación**: API v4 sin duda. Es gratis y legal.
 

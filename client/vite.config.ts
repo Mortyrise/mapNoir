@@ -5,5 +5,5 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   envDir: '..',
-  envPrefix: ['VITE_', 'MAPILLARY_'],
+  envPrefix: ['VITE_', 'MAPILLARY_', 'GOOGLE_'],
 })

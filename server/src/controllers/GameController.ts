@@ -5,17 +5,34 @@ import { AppError } from '../middleware/errorHandler'
 export class GameController {
   constructor(private readonly gameService: GameService) {}
 
-  newGame = async (req: Request, res: Response, next: NextFunction) => {
+  newGame = async (_req: Request, res: Response, next: NextFunction) => {
     try {
-      const difficulty = req.body.difficulty || 'medium'
-      if (!['easy', 'medium', 'hard'].includes(difficulty)) {
-        throw new AppError('Invalid difficulty', 400, 'INVALID_DIFFICULTY')
-      }
-
-      const result = await this.gameService.createGame(difficulty)
+      const result = await this.gameService.createGame()
 
       res.json({
         data: result,
+        meta: { timestamp: new Date().toISOString() },
+      })
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  reportPanoLocation = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { gameId, lat, lng } = req.body
+      if (!gameId || typeof lat !== 'number' || typeof lng !== 'number') {
+        throw new AppError('Missing gameId, lat, or lng', 400, 'INVALID_PANO_REPORT')
+      }
+
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        throw new AppError('Coordinates out of range', 400, 'INVALID_COORDINATES')
+      }
+
+      this.gameService.updateActualLocation(gameId, { lat, lng })
+
+      res.json({
+        data: { ok: true },
         meta: { timestamp: new Date().toISOString() },
       })
     } catch (err) {
@@ -28,6 +45,10 @@ export class GameController {
       const { gameId, lat, lng } = req.body
       if (!gameId || typeof lat !== 'number' || typeof lng !== 'number') {
         throw new AppError('Missing gameId, lat, or lng', 400, 'INVALID_GUESS')
+      }
+
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        throw new AppError('Coordinates out of range', 400, 'INVALID_COORDINATES')
       }
 
       const result = this.gameService.submitGuess(gameId, { lat, lng })

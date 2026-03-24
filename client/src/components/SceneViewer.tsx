@@ -1,53 +1,47 @@
-import { useEffect, useRef } from 'react'
-import { Viewer } from 'mapillary-js'
-import 'mapillary-js/dist/mapillary.css'
+import { MapillaryViewer } from './MapillaryViewer'
+import { GoogleStreetViewViewer } from './GoogleStreetViewViewer'
 
 interface SceneViewerProps {
-  imageId: string
-  accessToken: string
-  interactive?: boolean  // false = locked (no movement), true = can move
+  provider: 'mapillary' | 'google'
+  // Mapillary props
+  imageId?: string
+  mapillaryToken?: string
+  // Google props
+  gameId?: string
+  lat?: number
+  lng?: number
+  googleApiKey?: string
+  // Common
+  interactive?: boolean
 }
 
-export function SceneViewer({ imageId, accessToken, interactive = false }: SceneViewerProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const viewerRef = useRef<Viewer | null>(null)
-
-  useEffect(() => {
-    if (!containerRef.current || !imageId || imageId === 'placeholder') return
-
-    const viewer = new Viewer({
-      accessToken,
-      container: containerRef.current,
-      imageId,
-      component: {
-        cover: false,
-        direction: !interactive,  // hide direction arrows if not interactive
-        sequence: false,          // hide sequence navigation
-        zoom: true,
-      },
-    })
-
-    viewerRef.current = viewer
-
-    return () => {
-      viewer.remove()
-      viewerRef.current = null
-    }
-  }, [imageId, accessToken, interactive])
-
-  // Show placeholder if no image
-  if (!imageId || imageId === 'placeholder') {
+export function SceneViewer(props: SceneViewerProps) {
+  if (props.provider === 'google' && props.googleApiKey && props.lat != null && props.lng != null && props.gameId) {
     return (
-      <div className="scene-viewer scene-viewer-placeholder">
-        <p>No street-level imagery available</p>
-        <p className="scene-viewer-hint">Set MAPILLARY_TOKEN in server .env</p>
-      </div>
+      <GoogleStreetViewViewer
+        gameId={props.gameId}
+        lat={props.lat}
+        lng={props.lng}
+        apiKey={props.googleApiKey}
+        interactive={props.interactive}
+      />
+    )
+  }
+
+  if (props.provider === 'mapillary' && props.imageId && props.mapillaryToken) {
+    return (
+      <MapillaryViewer
+        imageId={props.imageId}
+        accessToken={props.mapillaryToken}
+        interactive={props.interactive}
+      />
     )
   }
 
   return (
-    <div className="scene-viewer">
-      <div ref={containerRef} className="scene-viewer-container" />
+    <div className="scene-viewer scene-viewer-placeholder">
+      <p>No scene provider configured</p>
+      <p className="scene-viewer-hint">Set SCENE_PROVIDER in .env</p>
     </div>
   )
 }
