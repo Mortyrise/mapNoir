@@ -83,3 +83,19 @@ export interface ApiErrorResponse {
 }
 
 export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse
+
+export interface SessionRoundResult {
+  roundIndex: number
+  score: number
+  distanceKm: number
+  actualLocation: Location
+  guessLocation: Location
+  breakdown: {
+    baseScore: number
+    cluePenalty: number
+    afterClues: number
+    timeBonus: number
+    afterTime: number
+    betMultiplier: number
+  }
+}

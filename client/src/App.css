@@ -437,6 +437,22 @@
 }
 
 /* -------------------------
+   ROUND INDICATOR
+   ------------------------- */
+.round-indicator {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-accent-primary);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-3);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* -------------------------
    HEADER CONTROLS
    ------------------------- */
 .app-header-controls {

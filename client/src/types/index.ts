@@ -72,3 +72,67 @@ export interface GuessResult {
   guessLocation: LatLng
   breakdown: ScoreBreakdown
 }
+
+export interface SessionResponse {
+  sessionId: string
+  caseNumber: number
+  difficulty: Difficulty
+  totalRounds: number
+  currentRound: number
+  energy: number
+  maxEnergy: number
+  game: {
+    gameId: string
+    imageId: string
+    provider: 'mapillary' | 'google'
+    searchLat?: number
+    searchLng?: number
+    initialClue: string
+    energy: number
+    timeLimit: number
+    difficulty: Difficulty
+  }
+}
+
+export interface BriefRoundResult {
+  roundIndex: number
+  score: number
+  distanceKm: number
+  actualLocation: LatLng
+  guessLocation: LatLng
+  breakdown: ScoreBreakdown
+  isLastRound: boolean
+  energyRemaining: number
+  sessionSummary?: SessionSummary
+}
+
+export interface SessionSummary {
+  caseNumber: number
+  difficulty: Difficulty
+  rounds: RoundSummaryEntry[]
+  totalScore: number
+  shareableText: string
+}
+
+export interface RoundSummaryEntry {
+  roundIndex: number
+  score: number
+  distanceKm: number
+  actualLocation: LatLng
+  guessLocation: LatLng
+}
+
+export interface NextRoundResponse {
+  currentRound: number
+  game: {
+    gameId: string
+    imageId: string
+    provider: 'mapillary' | 'google'
+    searchLat?: number
+    searchLng?: number
+    initialClue: string
+    energy: number
+    timeLimit: number
+    difficulty: Difficulty
+  }
+}

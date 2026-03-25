@@ -2,23 +2,29 @@ import { useState, useCallback, useRef } from 'react'
 import { GameMap } from './components/GameMap'
 import { SceneViewer } from './components/SceneViewer'
 import { ThemeToggle } from './components/ThemeToggle'
+import { MuteToggle } from './components/MuteToggle'
 import { Timer } from './components/Timer'
 import { ResourceBar } from './components/ResourceBar'
 import { CluePanel } from './components/CluePanel'
 import { LanguageSelector } from './components/LanguageSelector'
+import { RoundResultScreen } from './components/RoundResultScreen'
+import { FinalSummaryScreen } from './components/FinalSummaryScreen'
 import { useTheme } from './hooks/useTheme'
 import { useLanguage } from './hooks/useLanguage'
 import { useTranslation } from './hooks/useTranslation'
+import { useSounds } from './hooks/useSounds'
 import { api } from './services/api'
 import './components/GameMap.css'
 import './components/SceneViewer.css'
 import './components/Timer.css'
 import './components/ResourceBar.css'
 import './components/CluePanel.css'
+import './components/RoundResultScreen.css'
+import './components/FinalSummaryScreen.css'
 import './App.css'
-import type { LatLng, Difficulty, GameAction, ScoreBreakdown } from './types'
+import type { LatLng, Difficulty, GameAction, BriefRoundResult, SessionSummary } from './types'
 
-type GameState = 'idle' | 'briefing' | 'playing' | 'result'
+type GameState = 'idle' | 'briefing' | 'playing' | 'roundResult' | 'finalSummary'
 
 interface GameData {
   gameId: string
@@ -41,27 +47,21 @@ interface ResourceState {
   cluesAvailable: number
 }
 
-interface ResultData {
-  score: number
-  distanceKm: number
-  actualLocation: LatLng
-  guessLocation: LatLng
-  breakdown: ScoreBreakdown
-}
-
 const MAPILLARY_TOKEN = import.meta.env.MAPILLARY_TOKEN || ''
 const GOOGLE_API_KEY = import.meta.env.GOOGLE_MAPS_API_KEY || ''
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
+const TOTAL_ROUNDS = 5
 
 function App() {
   const { theme, toggleTheme } = useTheme()
   const { language, setLanguage } = useLanguage()
   const t = useTranslation(language)
+  const { play, muted, toggleMute } = useSounds()
 
+  // Core UI state
   const [gameState, setGameState] = useState<GameState>('idle')
   const [gameData, setGameData] = useState<GameData | null>(null)
-  const [resultData, setResultData] = useState<ResultData | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(null)
   const [difficulty, setDifficulty] = useState<Difficulty>('medium')
   const [loading, setLoading] = useState(false)
@@ -74,48 +74,86 @@ function App() {
     cluesAvailable: 3,
   })
 
+  // Session state
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [caseNumber, setCaseNumber] = useState<number>(0)
+  const [currentRound, setCurrentRound] = useState<number>(0)
+  const [maxEnergy, setMaxEnergy] = useState<number>(7)
+  const [briefResult, setBriefResult] = useState<BriefRoundResult | null>(null)
+  const [sessionSummary, setSessionSummary] = useState<SessionSummary | null>(null)
+  const [caseIntro, setCaseIntro] = useState<string>('')
+
   const gameIdRef = useRef<string | null>(null)
   const selectedLocationRef = useRef<LatLng | null>(null)
   selectedLocationRef.current = selectedLocation
 
-  const startGame = useCallback(async () => {
+  // Helper to set up a round's game data from server response
+  // Energy is NOT reset — it's shared across the session
+  const setupRound = useCallback((game: {
+    gameId: string
+    imageId: string
+    provider: 'mapillary' | 'google'
+    searchLat?: number
+    searchLng?: number
+    initialClue: string
+    energy: number
+    timeLimit: number
+    difficulty: Difficulty
+  }, sessionEnergy?: number) => {
+    const energy = sessionEnergy ?? game.energy
+    const gd: GameData = {
+      gameId: game.gameId,
+      imageId: game.imageId,
+      provider: game.provider,
+      searchLat: game.searchLat,
+      searchLng: game.searchLng,
+      initialClue: game.initialClue,
+      energy,
+      maxEnergy: energy,
+      timeLimit: game.timeLimit,
+      difficulty: game.difficulty,
+    }
+    setGameData(gd)
+    gameIdRef.current = game.gameId
+    setSelectedLocation(null)
+    selectedLocationRef.current = null
+    // Reset per-round state but preserve energy from session
+    setResources(prev => ({
+      energy: sessionEnergy ?? prev.energy,
+      movementUnlocked: false,
+      hasBet: false,
+      revealedClues: [],
+      cluesAvailable: 3,
+    }))
+  }, [])
+
+  // Start a new 5-round session
+  const startSession = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const data = await api.newGame(difficulty, language)
-      const gd: GameData = {
-        gameId: data.gameId,
-        imageId: data.imageId,
-        provider: data.provider,
-        searchLat: data.searchLat,
-        searchLng: data.searchLng,
-        initialClue: data.initialClue,
-        energy: data.energy,
-        maxEnergy: data.energy,
-        timeLimit: data.timeLimit,
-        difficulty: data.difficulty,
-      }
-      setGameData(gd)
-      gameIdRef.current = data.gameId
-      setSelectedLocation(null)
-      selectedLocationRef.current = null
-      setResultData(null)
-      setResources({
-        energy: data.energy,
-        movementUnlocked: false,
-        hasBet: false,
-        revealedClues: [],
-        cluesAvailable: 3,
-      })
-      // Go to briefing instead of playing — timer not started yet
+      const data = await api.newSession(difficulty, language)
+      setSessionId(data.sessionId)
+      setCaseNumber(data.caseNumber)
+      setCurrentRound(data.currentRound)
+      setBriefResult(null)
+      setSessionSummary(null)
+
+      setMaxEnergy(data.maxEnergy)
+
+      // Pick a random briefing intro
+      const introIndex = Math.floor(Math.random() * 3) + 1
+      setCaseIntro(t(`briefing.caseIntro.${introIndex}`))
+
+      setupRound(data.game, data.energy)
       setGameState('briefing')
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to start game'
+      const msg = err instanceof Error ? err.message : 'Failed to start session'
       setError(msg.includes('street-level') ? t('error.noScene') : msg)
     } finally {
       setLoading(false)
     }
-  }, [difficulty, language, t])
+  }, [difficulty, language, t, setupRound])
 
   // Player finished reading the briefing, start the timer and show the scene
   const startInvestigation = useCallback(async () => {
@@ -128,30 +166,44 @@ function App() {
     }
   }, [gameData])
 
+  // Submit guess for current round
   const submitGuess = useCallback(async (guessLocation: LatLng | null) => {
-    const currentGameId = gameIdRef.current
-    if (!currentGameId) return
+    const currentSessionId = sessionId
+    if (!currentSessionId) return
     gameIdRef.current = null
 
     setLoading(true)
     setError(null)
     try {
       const loc = guessLocation || { lat: 0, lng: 0 }
-      const result = await api.submitGuess(currentGameId, loc.lat, loc.lng)
-      setResultData({
-        score: result.score,
-        distanceKm: result.distanceKm,
-        actualLocation: result.actualLocation,
+      play('guess-submit')
+      const result = await api.submitSessionGuess(currentSessionId, loc.lat, loc.lng)
+
+      // Play result sound
+      play(result.distanceKm < 500 ? 'result-good' : 'result-bad')
+
+      setBriefResult({
+        ...result,
         guessLocation: loc,
-        breakdown: result.breakdown,
       })
-      setGameState('result')
+
+      // Update shared energy from server
+      if (result.energyRemaining !== undefined) {
+        setResources(prev => ({ ...prev, energy: result.energyRemaining }))
+      }
+
+      if (result.isLastRound && result.sessionSummary) {
+        setSessionSummary(result.sessionSummary)
+      }
+
+      setCurrentRound(result.roundIndex)
+      setGameState('roundResult')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit guess')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [sessionId, play])
 
   const confirmGuess = useCallback(async () => {
     await submitGuess(selectedLocation)
@@ -160,6 +212,33 @@ function App() {
   const handleTimeUp = useCallback(() => {
     submitGuess(selectedLocationRef.current)
   }, [submitGuess])
+
+  // Advance to next round
+  const handleNextRound = useCallback(async () => {
+    if (!sessionId) return
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await api.nextRound(sessionId)
+      setCurrentRound(data.currentRound)
+      // Pass current energy — setupRound will preserve it (shared across session)
+      setupRound(data.game)
+
+      // Start timer immediately (no briefing for rounds 2-5)
+      await api.startTimer(data.game.gameId)
+      setGameState('playing')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start next round')
+    } finally {
+      setLoading(false)
+    }
+  }, [sessionId, setupRound])
+
+  // Show final summary
+  const handleViewSummary = useCallback(() => {
+    play('session-complete')
+    setGameState('finalSummary')
+  }, [play])
 
   const handleAction = useCallback(async (action: GameAction) => {
     if (!gameData) return
@@ -187,6 +266,10 @@ function App() {
     setSelectedLocation(location)
   }, [])
 
+  const handleTimerTick = useCallback(() => {
+    play('timer-tick')
+  }, [play])
+
   return (
     <div className="app">
       <header className="app-header">
@@ -197,6 +280,7 @@ function App() {
           </div>
           <div className="app-header-controls">
             <LanguageSelector language={language} onChange={setLanguage} />
+            <MuteToggle muted={muted} onToggle={toggleMute} />
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </div>
         </div>
@@ -236,7 +320,7 @@ function App() {
 
               <button
                 className="btn btn-primary btn-lg"
-                onClick={startGame}
+                onClick={startSession}
                 disabled={loading}
               >
                 {loading ? t('idle.loading') : t('idle.newCase')}
@@ -248,8 +332,10 @@ function App() {
         {gameState === 'briefing' && gameData && (
           <div className="briefing-screen">
             <div className="briefing-content">
-              <h2 className="briefing-title">{t('briefing.title')}</h2>
-              <p className="briefing-subtitle">{t('briefing.subtitle')}</p>
+              <h2 className="briefing-title">
+                {t('session.case')} #{caseNumber}
+              </h2>
+              <p className="briefing-subtitle">{caseIntro}</p>
 
               <div className="briefing-clue">
                 <span className="clue-tag">{t('clue.intel')}</span>
@@ -285,13 +371,18 @@ function App() {
           <div className="game-layout">
             <div className="scene-panel">
               <div className="scene-hud">
+                <div className="round-indicator">
+                  {t('game.round')} {currentRound + 1}/{TOTAL_ROUNDS}
+                </div>
                 <Timer
+                  key={currentRound}
                   timeLimit={gameData.timeLimit}
                   onTimeUp={handleTimeUp}
+                  onUrgentTick={handleTimerTick}
                 />
                 <ResourceBar
                   energy={resources.energy}
-                  maxEnergy={gameData.maxEnergy}
+                  maxEnergy={maxEnergy}
                   movementUnlocked={resources.movementUnlocked}
                   hasBet={resources.hasBet}
                   cluesAvailable={resources.cluesAvailable > 0}
@@ -318,6 +409,7 @@ function App() {
             </div>
             <div className="map-panel">
               <GameMap
+                key={`map-${currentRound}`}
                 onLocationSelect={handleLocationSelect}
                 theme={theme}
               />
@@ -334,65 +426,35 @@ function App() {
           </div>
         )}
 
-        {gameState === 'result' && resultData && (
-          <div className="result-screen">
-            <div className="result-header">
-              <h2 className="result-title">{t('result.title')}</h2>
-              <div className="result-stats">
-                <div className="result-stat">
-                  <span className="result-stat-label">{t('result.score')}</span>
-                  <span className="result-stat-value">{resultData.score.toLocaleString()}</span>
-                </div>
-                <div className="result-stat">
-                  <span className="result-stat-label">{t('result.distance')}</span>
-                  <span className="result-stat-value">{resultData.distanceKm.toLocaleString()} km</span>
-                </div>
-              </div>
+        {gameState === 'roundResult' && briefResult && (
+          <RoundResultScreen
+            roundIndex={briefResult.roundIndex}
+            totalRounds={TOTAL_ROUNDS}
+            score={briefResult.score}
+            distanceKm={briefResult.distanceKm}
+            guessLocation={briefResult.guessLocation}
+            actualLocation={briefResult.actualLocation}
+            isLastRound={briefResult.isLastRound}
+            onNextRound={handleNextRound}
+            onViewSummary={handleViewSummary}
+            theme={theme}
+            t={t}
+            loading={loading}
+          />
+        )}
 
-              <div className="result-breakdown">
-                <div className="breakdown-row">
-                  <span className="breakdown-label">{t('result.baseScore')}</span>
-                  <span className="breakdown-value">
-                    {resultData.breakdown.baseScore.toLocaleString()}
-                    <span className="breakdown-max"> / 5,000</span>
-                  </span>
-                </div>
-                {resultData.breakdown.cluePenalty > 0 && (
-                  <div className="breakdown-row breakdown-penalty">
-                    <span className="breakdown-label">{t('result.cluePenalty')} (-{resultData.breakdown.cluePenalty}%)</span>
-                    <span className="breakdown-value">-{(resultData.breakdown.baseScore - resultData.breakdown.afterClues).toLocaleString()}</span>
-                  </div>
-                )}
-                {resultData.breakdown.timeBonus > 0 && (
-                  <div className="breakdown-row breakdown-bonus">
-                    <span className="breakdown-label">{t('result.timeBonus')} (+{resultData.breakdown.timeBonus}%)</span>
-                    <span className="breakdown-value">+{(resultData.breakdown.afterTime - resultData.breakdown.afterClues).toLocaleString()}</span>
-                  </div>
-                )}
-                {resultData.breakdown.betMultiplier > 1 && (
-                  <div className="breakdown-row breakdown-bet">
-                    <span className="breakdown-label">{t('result.betMultiplier')} (x{resultData.breakdown.betMultiplier})</span>
-                    <span className="breakdown-value">+{(resultData.score - resultData.breakdown.afterTime).toLocaleString()}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="result-map">
-              <GameMap
-                theme={theme}
-                disabled
-                resultMarkers={{
-                  guess: resultData.guessLocation,
-                  actual: resultData.actualLocation,
-                }}
-              />
-            </div>
-            <div className="result-actions">
-              <button className="btn btn-primary btn-lg" onClick={startGame} disabled={loading}>
-                {loading ? t('idle.loading') : t('result.newCase')}
-              </button>
-            </div>
-          </div>
+        {gameState === 'finalSummary' && sessionSummary && (
+          <FinalSummaryScreen
+            caseNumber={sessionSummary.caseNumber}
+            difficulty={sessionSummary.difficulty}
+            rounds={sessionSummary.rounds}
+            totalScore={sessionSummary.totalScore}
+            shareableText={sessionSummary.shareableText}
+            onPlayAgain={startSession}
+            theme={theme}
+            t={t}
+            loading={loading}
+          />
         )}
       </main>
     </div>

@@ -1,0 +1,197 @@
+.final-summary-screen {
+  --color-round-good: #2d8a4e;
+  --color-round-mid: #c9a84c;
+  --color-round-bad: #c44;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Header: title + case + total + dots */
+.final-summary-header {
+  text-align: center;
+  padding: var(--space-4) 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.final-summary-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  color: var(--color-accent-primary);
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+.final-summary-case {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.final-summary-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-8);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glow);
+}
+
+.final-summary-total-value {
+  font-family: var(--font-heading);
+  font-size: var(--text-4xl);
+  color: var(--color-accent-primary);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+}
+
+.final-summary-total-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+
+/* Round performance dots */
+.round-dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.round-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  cursor: help;
+  transition: transform 0.15s ease;
+}
+
+.round-dot:hover {
+  transform: scale(1.3);
+}
+
+.round-dot.round-good {
+  background-color: var(--color-round-good);
+  box-shadow: 0 0 6px var(--color-round-good);
+}
+
+.round-dot.round-mid {
+  background-color: var(--color-round-mid);
+  box-shadow: 0 0 6px var(--color-round-mid);
+}
+
+.round-dot.round-bad {
+  background-color: var(--color-round-bad);
+  box-shadow: 0 0 6px var(--color-round-bad);
+}
+
+/* Map */
+.final-summary-map {
+  min-height: 350px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.final-summary-map .game-map-container {
+  height: 350px;
+}
+
+/* Score table */
+.final-summary-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.summary-table-row {
+  display: grid;
+  grid-template-columns: 40px 8px 1fr auto;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  align-items: center;
+}
+
+.summary-table-round {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.summary-table-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.summary-table-distance {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+
+.summary-table-score {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: right;
+}
+
+/* Color the score based on round performance */
+.summary-table-row.round-good .summary-table-score {
+  color: var(--color-round-good);
+}
+
+.summary-table-row.round-mid .summary-table-score {
+  color: var(--color-round-mid);
+}
+
+.summary-table-row.round-bad .summary-table-score {
+  color: var(--color-round-bad);
+}
+
+/* Share box */
+.final-summary-share {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.share-text {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin: 0;
+  white-space: pre;
+  overflow-x: auto;
+  max-width: 100%;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.final-summary-actions {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2) 0 var(--space-4);
+}

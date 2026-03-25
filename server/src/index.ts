@@ -11,10 +11,13 @@ import rateLimit from 'express-rate-limit'
 import { errorHandler } from './middleware/errorHandler'
 import { ApiSuccessResponse } from './types'
 import { createGameRouter } from './routes/game'
+import { createSessionRouter } from './routes/session'
 import { JsonGameRepository } from './repositories/JsonGameRepository'
 import { MapillaryAdapter } from './adapters/MapillaryAdapter'
 import { GameService } from './services/GameService'
 import { GameController } from './controllers/GameController'
+import { SessionService } from './services/SessionService'
+import { SessionController } from './controllers/SessionController'
 
 const app = express()
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001
@@ -63,9 +66,12 @@ if (!mapillaryToken) {
 
 const gameService = new GameService(repo, mapillary)
 const gameController = new GameController(gameService)
+const sessionService = new SessionService(gameService)
+const sessionController = new SessionController(sessionService)
 
 // Routes
 app.use('/api/game', createGameRouter(gameController))
+app.use('/api/session', createSessionRouter(sessionController))
 
 // Global error handler (must be registered last)
 app.use(errorHandler)

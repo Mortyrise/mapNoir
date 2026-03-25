@@ -15,11 +15,11 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Difficulty
     'difficulty.easy': 'Easy',
-    'difficulty.easy.detail': '4 energy, 60s',
+    'difficulty.easy.detail': '10 energy, 60s/round',
     'difficulty.medium': 'Medium',
-    'difficulty.medium.detail': '3 energy, 45s',
+    'difficulty.medium.detail': '7 energy, 45s/round',
     'difficulty.hard': 'Hard',
-    'difficulty.hard.detail': '2 energy, 30s',
+    'difficulty.hard.detail': '4 energy, 30s/round',
 
     // Briefing
     'briefing.title': 'Case Briefing',
@@ -76,6 +76,34 @@ export const translations: Record<Language, Record<string, string>> = {
     // Theme
     'theme.light': 'Switch to light mode',
     'theme.dark': 'Switch to dark mode',
+
+    // Session / Rounds
+    'game.round': 'Round',
+    'session.case': 'Case',
+
+    // Briefing narrative intros (3 variants, randomly selected)
+    'briefing.caseIntro.1': 'An anonymous tip came in at 0300 hours. A suspect has been spotted at an unknown location. Study the scene and determine the coordinates.',
+    'briefing.caseIntro.2': 'Intelligence intercepted a coded transmission. We traced it to a street-level camera feed. Identify the suspect\'s position.',
+    'briefing.caseIntro.3': 'A field agent went dark after sending partial coordinates. Reconstruct their route from the available evidence.',
+
+    // Round Result (brief, between rounds)
+    'roundResult.title': 'Round Complete',
+    'roundResult.nextRound': 'Next Round',
+    'roundResult.viewSummary': 'View Report',
+
+    // Final Summary
+    'summary.title': 'Case Report',
+    'summary.round': 'Round',
+    'summary.distance': 'Distance',
+    'summary.score': 'Score',
+    'summary.totalScore': 'Total Score',
+    'summary.share': 'Share Result',
+    'summary.copied': 'Copied!',
+    'summary.playAgain': 'New Case',
+
+    // Sound
+    'sound.mute': 'Mute sounds',
+    'sound.unmute': 'Unmute sounds',
   },
   es: {
     // Header
@@ -91,11 +119,11 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Difficulty
     'difficulty.easy': 'Fácil',
-    'difficulty.easy.detail': '4 energía, 60s',
+    'difficulty.easy.detail': '10 energía, 60s/ronda',
     'difficulty.medium': 'Media',
-    'difficulty.medium.detail': '3 energía, 45s',
+    'difficulty.medium.detail': '7 energía, 45s/ronda',
     'difficulty.hard': 'Difícil',
-    'difficulty.hard.detail': '2 energía, 30s',
+    'difficulty.hard.detail': '4 energía, 30s/ronda',
 
     // Briefing
     'briefing.title': 'Informe del Caso',
@@ -152,5 +180,33 @@ export const translations: Record<Language, Record<string, string>> = {
     // Theme
     'theme.light': 'Cambiar a modo claro',
     'theme.dark': 'Cambiar a modo oscuro',
+
+    // Session / Rounds
+    'game.round': 'Ronda',
+    'session.case': 'Caso',
+
+    // Briefing narrative intros
+    'briefing.caseIntro.1': 'Recibimos un aviso anónimo a las 0300. Un sospechoso ha sido avistado en una ubicación desconocida. Estudia la escena y determina las coordenadas.',
+    'briefing.caseIntro.2': 'Inteligencia interceptó una transmisión cifrada. La rastreamos hasta una cámara a pie de calle. Identifica la posición del sospechoso.',
+    'briefing.caseIntro.3': 'Un agente de campo dejó de responder tras enviar coordenadas parciales. Reconstruye su ruta con la evidencia disponible.',
+
+    // Round Result
+    'roundResult.title': 'Ronda Completada',
+    'roundResult.nextRound': 'Siguiente Ronda',
+    'roundResult.viewSummary': 'Ver Informe',
+
+    // Final Summary
+    'summary.title': 'Informe del Caso',
+    'summary.round': 'Ronda',
+    'summary.distance': 'Distancia',
+    'summary.score': 'Puntuación',
+    'summary.totalScore': 'Puntuación Total',
+    'summary.share': 'Compartir Resultado',
+    'summary.copied': '¡Copiado!',
+    'summary.playAgain': 'Nuevo Caso',
+
+    // Sound
+    'sound.mute': 'Silenciar sonidos',
+    'sound.unmute': 'Activar sonidos',
   },
 }

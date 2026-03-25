@@ -3,16 +3,20 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 interface TimerProps {
   timeLimit: number // seconds
   onTimeUp: () => void
+  onUrgentTick?: () => void
   paused?: boolean
 }
 
-export function Timer({ timeLimit, onTimeUp, paused = false }: TimerProps) {
+export function Timer({ timeLimit, onTimeUp, onUrgentTick, paused = false }: TimerProps) {
   const [remaining, setRemaining] = useState(timeLimit)
   const startTimeRef = useRef(Date.now())
   const onTimeUpRef = useRef(onTimeUp)
+  const onUrgentTickRef = useRef(onUrgentTick)
   const firedRef = useRef(false)
+  const lastTickSecRef = useRef(-1)
 
   onTimeUpRef.current = onTimeUp
+  onUrgentTickRef.current = onUrgentTick
 
   useEffect(() => {
     startTimeRef.current = Date.now()
@@ -27,6 +31,13 @@ export function Timer({ timeLimit, onTimeUp, paused = false }: TimerProps) {
       const elapsed = (Date.now() - startTimeRef.current) / 1000
       const left = Math.max(0, timeLimit - elapsed)
       setRemaining(left)
+
+      // Play tick sound each second when urgent
+      const sec = Math.ceil(left)
+      if (left > 0 && left <= 10 && sec !== lastTickSecRef.current) {
+        lastTickSecRef.current = sec
+        onUrgentTickRef.current?.()
+      }
 
       if (left <= 0 && !firedRef.current) {
         firedRef.current = true

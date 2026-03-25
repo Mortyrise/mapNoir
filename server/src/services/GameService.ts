@@ -28,7 +28,7 @@ interface ActiveGame {
   purchasableClues: string[] // clues available for purchase (not yet revealed)
 }
 
-interface PoolEntry {
+export interface PoolEntry {
   imageId: string
   lat: number
   lng: number
@@ -95,6 +95,108 @@ export class GameService {
     return provider === 'google' ? 'google' : 'mapillary'
   }
 
+  private buildGame(
+    location: Location,
+    countryCode: string,
+    imageId: string,
+    thumbUrl: string,
+    provider: 'mapillary' | 'google',
+    difficulty: Difficulty,
+    language: Language
+  ): ActiveGame {
+    const energy = ENERGY_BY_DIFFICULTY[difficulty]
+    const timeLimit = TIME_LIMIT_BY_DIFFICULTY[difficulty]
+    const clues = this.clueGenerator.generateCluesForLocation(countryCode, difficulty, language)
+    return {
+      id: uuidv4(),
+      actualLocation: location,
+      countryCode,
+      imageId,
+      thumbUrl,
+      provider,
+      createdAt: Date.now(),
+      difficulty,
+      energy,
+      energyUsed: 0,
+      cluesRevealed: 0,
+      hasBet: false,
+      startTime: 0,
+      timeLimit,
+      movementUnlocked: false,
+      initialClue: clues.initial,
+      revealedClues: [],
+      purchasableClues: clues.purchasable,
+    }
+  }
+
+  /**
+   * Picks N unique random locations from the pre-generated pool.
+   * Throws if the pool doesn't have enough locations.
+   */
+  async getUniquePoolLocations(count: number): Promise<PoolEntry[]> {
+    const pool = await this.loadPool()
+    if (pool.length < count) {
+      throw new Error(`Not enough locations in pool (need ${count}, have ${pool.length})`)
+    }
+
+    const indices = new Set<number>()
+    while (indices.size < count) {
+      indices.add(Math.floor(Math.random() * pool.length))
+    }
+
+    return Array.from(indices).map((i) => pool[i])
+  }
+
+  /**
+   * Creates a game for a specific pool entry (used by SessionService).
+   * Returns the same shape as createGame.
+   */
+  createRoundGame(
+    entry: PoolEntry,
+    difficulty: Difficulty,
+    language: Language,
+    energyOverride?: number
+  ): {
+    gameId: string
+    imageId: string
+    thumbUrl: string
+    provider: 'mapillary' | 'google'
+    initialClue: string
+    energy: number
+    timeLimit: number
+    difficulty: Difficulty
+  } {
+    this.cleanupExpiredGames()
+
+    const game = this.buildGame(
+      { lat: entry.lat, lng: entry.lng },
+      entry.countryCode,
+      entry.imageId,
+      entry.thumbUrl,
+      'mapillary',
+      difficulty,
+      language
+    )
+
+    // Override energy if session provides shared energy
+    if (energyOverride !== undefined) {
+      game.energy = energyOverride
+    }
+
+    activeGames.set(game.id, game)
+
+    return {
+      gameId: game.id,
+      imageId: game.imageId,
+      thumbUrl: game.thumbUrl,
+      provider: 'mapillary',
+      initialClue: game.initialClue,
+      energy: game.energy,
+      timeLimit: game.timeLimit,
+      difficulty: game.difficulty,
+    }
+  }
+
   async createGame(difficulty: Difficulty = 'medium', language: Language = 'en'): Promise<{
     gameId: string
     imageId: string
@@ -110,44 +212,10 @@ export class GameService {
   }> {
     this.cleanupExpiredGames()
 
-    const energy = ENERGY_BY_DIFFICULTY[difficulty]
-    const timeLimit = TIME_LIMIT_BY_DIFFICULTY[difficulty]
-
-    // Helper to build a game from location data
-    const buildGame = (
-      location: Location,
-      countryCode: string,
-      imageId: string,
-      thumbUrl: string,
-      provider: 'mapillary' | 'google'
-    ): ActiveGame => {
-      const clues = this.clueGenerator.generateCluesForLocation(countryCode, difficulty, language)
-      return {
-        id: uuidv4(),
-        actualLocation: location,
-        countryCode,
-        imageId,
-        thumbUrl,
-        provider,
-        createdAt: Date.now(),
-        difficulty,
-        energy,
-        energyUsed: 0,
-        cluesRevealed: 0,
-        hasBet: false,
-        startTime: 0, // Set when player starts the timer (after briefing)
-        timeLimit,
-        movementUnlocked: false,
-        initialClue: clues.initial,
-        revealedClues: [],
-        purchasableClues: clues.purchasable,
-      }
-    }
-
     // Google Street View provider
     if (this.sceneProvider === 'google') {
       const location = await this.repo.getRandomLocation()
-      const game = buildGame(location, '', 'google', '', 'google')
+      const game = this.buildGame(location, '', 'google', '', 'google', difficulty, language)
       activeGames.set(game.id, game)
       return {
         gameId: game.id,
@@ -166,7 +234,7 @@ export class GameService {
     // Mapillary provider
     if (!this.mapillary) {
       const location = await this.repo.getRandomLocation()
-      const game = buildGame(location, '', 'placeholder', '', 'mapillary')
+      const game = this.buildGame(location, '', 'placeholder', '', 'mapillary', difficulty, language)
       activeGames.set(game.id, game)
       return {
         gameId: game.id,
@@ -184,12 +252,14 @@ export class GameService {
     const pool = await this.loadPool()
     if (pool.length > 0) {
       const entry = pool[Math.floor(Math.random() * pool.length)]
-      const game = buildGame(
+      const game = this.buildGame(
         { lat: entry.lat, lng: entry.lng },
         entry.countryCode,
         entry.imageId,
         entry.thumbUrl,
-        'mapillary'
+        'mapillary',
+        difficulty,
+        language
       )
       activeGames.set(game.id, game)
       return {
@@ -222,12 +292,14 @@ export class GameService {
       const idx = results.findIndex((r) => r !== null)
       if (idx !== -1) {
         const image = results[idx]!
-        const game = buildGame(
+        const game = this.buildGame(
           { lat: image.geometry.coordinates[1], lng: image.geometry.coordinates[0] },
           '',
           String(image.id),
           image.thumb_2048_url,
-          'mapillary'
+          'mapillary',
+          difficulty,
+          language
         )
         activeGames.set(game.id, game)
         return {
@@ -373,6 +445,7 @@ export class GameService {
     score: number
     distanceKm: number
     actualLocation: Location
+    energyRemaining: number
     breakdown: {
       baseScore: number
       cluePenalty: number
@@ -408,6 +481,8 @@ export class GameService {
       timedOut
     )
 
+    const energyRemaining = game.energy
+
     // Remove game from active (one guess per game)
     activeGames.delete(gameId)
 
@@ -415,6 +490,7 @@ export class GameService {
       score: score.final,
       distanceKm: Math.round(distanceKm * 10) / 10,
       actualLocation: game.actualLocation, // NOW we reveal it
+      energyRemaining,
       breakdown: {
         baseScore: score.base,
         cluePenalty: score.cluePenalty,

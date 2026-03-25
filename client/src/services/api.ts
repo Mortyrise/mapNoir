@@ -1,4 +1,4 @@
-import type { Difficulty, GameAction, NewGameResponse, ActionResponse, GuessResponse } from '../types'
+import type { Difficulty, GameAction, NewGameResponse, ActionResponse, GuessResponse, SessionResponse, BriefRoundResult, NextRoundResponse, SessionSummary } from '../types'
 import type { Language } from '../i18n/translations'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
@@ -48,5 +48,27 @@ export const api = {
     request<GuessResponse>('/game/guess', {
       method: 'POST',
       body: JSON.stringify({ gameId, lat, lng }),
+    }),
+
+  newSession: (difficulty: string, language: string) =>
+    request<SessionResponse>('/session/new', {
+      method: 'POST',
+      body: JSON.stringify({ difficulty, language }),
+    }),
+
+  submitSessionGuess: (sessionId: string, lat: number, lng: number) =>
+    request<BriefRoundResult>('/session/' + sessionId + '/guess', {
+      method: 'POST',
+      body: JSON.stringify({ lat, lng }),
+    }),
+
+  nextRound: (sessionId: string) =>
+    request<NextRoundResponse>('/session/' + sessionId + '/next', {
+      method: 'POST',
+    }),
+
+  getSessionSummary: (sessionId: string) =>
+    request<SessionSummary>('/session/' + sessionId + '/summary', {
+      method: 'GET',
     }),
 }

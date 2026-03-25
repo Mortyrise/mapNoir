@@ -4,12 +4,19 @@ import type { MapAdapter } from '../adapters/MapAdapter'
 import type { LatLng } from '../types'
 import 'leaflet/dist/leaflet.css'
 
+interface MultiResultMarker {
+  guess: LatLng
+  actual: LatLng
+  roundIndex: number
+}
+
 interface GameMapProps {
   onLocationSelect?: (location: LatLng) => void
   selectedLocation?: LatLng | null
   disabled?: boolean
   theme?: 'dark' | 'light'
   resultMarkers?: { guess: LatLng; actual: LatLng }
+  multiResultMarkers?: MultiResultMarker[]
 }
 
 const DEFAULT_CONFIG = {
@@ -19,7 +26,9 @@ const DEFAULT_CONFIG = {
   maxZoom: 18,
 }
 
-export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 'dark', resultMarkers }: GameMapProps) {
+const ROUND_COLORS = ['#D4A017', '#4A90D9', '#D94A4A', '#4AD97A', '#D94AD9']
+
+export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 'dark', resultMarkers, multiResultMarkers }: GameMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const adapterRef = useRef<MapAdapter | null>(null)
   const markerIdRef = useRef<string | null>(null)
@@ -119,6 +128,38 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
     adapter.fitBounds([resultMarkers.guess, resultMarkers.actual])
   }, [resultMarkers])
 
+  // Show multiple result markers (final summary with all rounds)
+  useEffect(() => {
+    if (!multiResultMarkers || multiResultMarkers.length === 0) return
+    const adapter = adapterRef.current
+    if (!adapter) return
+
+    adapter.clearMarkers()
+
+    const allPoints: LatLng[] = []
+
+    for (const { guess, actual, roundIndex } of multiResultMarkers) {
+      const color = ROUND_COLORS[roundIndex % ROUND_COLORS.length]
+
+      adapter.placeMarker(guess, { color, label: `Round ${roundIndex + 1}` })
+      adapter.placeMarker(actual, { color: '#2d8a4e' })
+      adapter.drawLine(guess, actual, { dashed: true })
+
+      allPoints.push(guess, actual)
+    }
+
+    if (allPoints.length >= 2) {
+      let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity
+      for (const p of allPoints) {
+        if (p.lat < minLat) minLat = p.lat
+        if (p.lat > maxLat) maxLat = p.lat
+        if (p.lng < minLng) minLng = p.lng
+        if (p.lng > maxLng) maxLng = p.lng
+      }
+      adapter.fitBounds([{ lat: minLat, lng: minLng }, { lat: maxLat, lng: maxLng }])
+    }
+  }, [multiResultMarkers])
+
   return (
     <div className="game-map-container">
       <div
@@ -126,7 +167,7 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
         className="game-map"
         style={{ width: '100%', height: '100%' }}
       />
-      {coords && !resultMarkers && (
+      {coords && !resultMarkers && !multiResultMarkers && (
         <div className="game-map-coords">
           {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
         </div>
