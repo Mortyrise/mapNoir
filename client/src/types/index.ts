@@ -122,6 +122,37 @@ export interface RoundSummaryEntry {
   guessLocation: LatLng
 }
 
+export type ReviewVote = 'approve' | 'reject'
+
+export interface ReviewLocation {
+  imageId: string
+  lat: number
+  lng: number
+  thumbUrl: string
+  countryCode: string
+  review?: {
+    vote: ReviewVote
+    note?: string
+    reviewedAt: string
+  }
+}
+
+export interface ReviewCountryStats {
+  countryCode: string
+  total: number
+  reviewed: number
+  approved: number
+  rejected: number
+}
+
+export interface ReviewStats {
+  total: number
+  reviewed: number
+  approved: number
+  rejected: number
+  countries: ReviewCountryStats[]
+}
+
 export interface NextRoundResponse {
   currentRound: number
   game: {

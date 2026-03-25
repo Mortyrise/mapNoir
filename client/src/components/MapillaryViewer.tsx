@@ -33,6 +33,8 @@ export function MapillaryViewer({ imageId, accessToken, interactive = false, t }
 
     viewer.on('image', () => {
       setIsLoading(false)
+      // Zoom out to widest view (0 = min zoom, 3 = max zoom)
+      viewer.setZoom(0)
     })
 
     viewerRef.current = viewer

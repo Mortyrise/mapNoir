@@ -20,9 +20,20 @@ export interface CountryData {
     east: number
     west: number
   }
+  cities: { name: string; lat: number; lng: number }[]
 }
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
+
+export type ReviewVote = 'approve' | 'reject'
+
+export interface LocationReview {
+  imageId: string
+  countryCode: string
+  vote: ReviewVote
+  note?: string
+  reviewedAt: string
+}
 
 export type ClueType = 'auditory' | 'contextual' | 'geopolitical' | 'narrative' | 'negative'
 

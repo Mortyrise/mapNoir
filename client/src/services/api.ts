@@ -1,4 +1,4 @@
-import type { Difficulty, GameAction, NewGameResponse, ActionResponse, GuessResponse, SessionResponse, BriefRoundResult, NextRoundResponse, SessionSummary } from '../types'
+import type { Difficulty, GameAction, NewGameResponse, ActionResponse, GuessResponse, SessionResponse, BriefRoundResult, NextRoundResponse, SessionSummary, ReviewLocation, ReviewStats, ReviewVote } from '../types'
 import type { Language } from '../i18n/translations'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
@@ -71,4 +71,27 @@ export const api = {
     request<SessionSummary>('/session/' + sessionId + '/summary', {
       method: 'GET',
     }),
+
+  // Review
+  getReviewLocations: (country?: string, status?: string) => {
+    const params = new URLSearchParams()
+    if (country) params.set('country', country)
+    if (status) params.set('status', status)
+    return request<ReviewLocation[]>(`/review/locations?${params}`)
+  },
+
+  submitReview: (imageId: string, vote: ReviewVote, note?: string) =>
+    request<{ ok: boolean }>('/review/vote', {
+      method: 'POST',
+      body: JSON.stringify({ imageId, vote, note }),
+    }),
+
+  deleteLocation: (imageId: string) =>
+    request<{ ok: boolean }>(`/review/location/${imageId}`, {
+      method: 'DELETE',
+    }),
+
+  getReviewStats: () => request<ReviewStats>('/review/stats'),
+
+  getReviewCountries: () => request<string[]>('/review/countries'),
 }

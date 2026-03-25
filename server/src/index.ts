@@ -18,6 +18,9 @@ import { GameService } from './services/GameService'
 import { GameController } from './controllers/GameController'
 import { SessionService } from './services/SessionService'
 import { SessionController } from './controllers/SessionController'
+import { ReviewService } from './services/ReviewService'
+import { ReviewController } from './controllers/ReviewController'
+import { createReviewRouter } from './routes/review'
 
 const app = express()
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001
@@ -68,10 +71,13 @@ const gameService = new GameService(repo, mapillary)
 const gameController = new GameController(gameService)
 const sessionService = new SessionService(gameService)
 const sessionController = new SessionController(sessionService)
+const reviewService = new ReviewService()
+const reviewController = new ReviewController(reviewService)
 
 // Routes
 app.use('/api/game', createGameRouter(gameController))
 app.use('/api/session', createSessionRouter(sessionController))
+app.use('/api/review', createReviewRouter(reviewController))
 
 // Global error handler (must be registered last)
 app.use(errorHandler)
