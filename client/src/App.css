@@ -365,25 +365,22 @@
   line-height: var(--leading-tight);
 }
 
-.result-stat-max {
-  font-size: var(--text-sm);
-  color: var(--color-text-tertiary);
-}
 
-/* Result breakdown */
+/* Result breakdown — vertical waterfall */
 .result-breakdown {
   display: flex;
-  justify-content: center;
-  gap: var(--space-4);
+  flex-direction: column;
+  gap: var(--space-2);
   margin-top: var(--space-4);
-  flex-wrap: wrap;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.breakdown-item {
+.breakdown-row {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: var(--space-1);
   padding: var(--space-2) var(--space-4);
   background-color: var(--color-bg-tertiary);
   border-radius: var(--radius-md);
@@ -391,10 +388,8 @@
 }
 
 .breakdown-label {
-  font-size: var(--text-xs);
-  color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
@@ -405,10 +400,22 @@
   color: var(--color-text-primary);
 }
 
+.breakdown-max {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+}
+
+.breakdown-penalty .breakdown-label,
 .breakdown-penalty .breakdown-value {
   color: #c44;
 }
 
+.breakdown-bonus .breakdown-value {
+  color: #4a6;
+}
+
+.breakdown-bet .breakdown-label,
 .breakdown-bet .breakdown-value {
   color: var(--color-accent-primary);
 }

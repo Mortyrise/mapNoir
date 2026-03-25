@@ -342,7 +342,6 @@ function App() {
                 <div className="result-stat">
                   <span className="result-stat-label">{t('result.score')}</span>
                   <span className="result-stat-value">{resultData.score.toLocaleString()}</span>
-                  <span className="result-stat-max">/ 5,000</span>
                 </div>
                 <div className="result-stat">
                   <span className="result-stat-label">{t('result.distance')}</span>
@@ -351,24 +350,29 @@ function App() {
               </div>
 
               <div className="result-breakdown">
-                <div className="breakdown-item">
+                <div className="breakdown-row">
                   <span className="breakdown-label">{t('result.baseScore')}</span>
-                  <span className="breakdown-value">{resultData.breakdown.baseScore.toLocaleString()}</span>
+                  <span className="breakdown-value">
+                    {resultData.breakdown.baseScore.toLocaleString()}
+                    <span className="breakdown-max"> / 5,000</span>
+                  </span>
                 </div>
                 {resultData.breakdown.cluePenalty > 0 && (
-                  <div className="breakdown-item breakdown-penalty">
-                    <span className="breakdown-label">{t('result.cluePenalty')}</span>
-                    <span className="breakdown-value">-{resultData.breakdown.cluePenalty}%</span>
+                  <div className="breakdown-row breakdown-penalty">
+                    <span className="breakdown-label">{t('result.cluePenalty')} (-{resultData.breakdown.cluePenalty}%)</span>
+                    <span className="breakdown-value">-{(resultData.breakdown.baseScore - resultData.breakdown.afterClues).toLocaleString()}</span>
                   </div>
                 )}
-                <div className="breakdown-item">
-                  <span className="breakdown-label">{t('result.timeBonus')}</span>
-                  <span className="breakdown-value">+{resultData.breakdown.timeBonus}%</span>
-                </div>
+                {resultData.breakdown.timeBonus > 0 && (
+                  <div className="breakdown-row breakdown-bonus">
+                    <span className="breakdown-label">{t('result.timeBonus')} (+{resultData.breakdown.timeBonus}%)</span>
+                    <span className="breakdown-value">+{(resultData.breakdown.afterTime - resultData.breakdown.afterClues).toLocaleString()}</span>
+                  </div>
+                )}
                 {resultData.breakdown.betMultiplier > 1 && (
-                  <div className="breakdown-item breakdown-bet">
-                    <span className="breakdown-label">{t('result.betMultiplier')}</span>
-                    <span className="breakdown-value">x{resultData.breakdown.betMultiplier}</span>
+                  <div className="breakdown-row breakdown-bet">
+                    <span className="breakdown-label">{t('result.betMultiplier')} (x{resultData.breakdown.betMultiplier})</span>
+                    <span className="breakdown-value">+{(resultData.score - resultData.breakdown.afterTime).toLocaleString()}</span>
                   </div>
                 )}
               </div>

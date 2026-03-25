@@ -52,7 +52,9 @@ export interface ActionResponse {
 export interface ScoreBreakdown {
   baseScore: number
   cluePenalty: number
+  afterClues: number
   timeBonus: number
+  afterTime: number
   betMultiplier: number
 }
 

@@ -19,6 +19,17 @@ const MARKER_BORDER = {
   light: '#ffffff',
 }
 
+const LINE_COLORS = {
+  dark: {
+    outline: 'rgba(212, 160, 23, 0.2)',
+    foreground: 'rgba(212, 160, 23, 0.8)',
+  },
+  light: {
+    outline: 'rgba(255, 255, 255, 0.8)',
+    foreground: 'rgba(100, 75, 25, 0.85)',
+  },
+}
+
 let markerIdCounter = 0
 
 function nextMarkerId(): string {
@@ -53,7 +64,7 @@ export class LeafletMapAdapter implements MapAdapter {
   private map: L.Map | null = null
   private tileLayer: L.TileLayer | null = null
   private markers: Map<string, L.Marker> = new Map()
-  private lines: Map<string, L.Polyline> = new Map()
+  private lines: Map<string, { outline: L.Polyline; foreground: L.Polyline }> = new Map()
   private currentTheme: 'dark' | 'light' = 'dark'
 
   initialize(container: HTMLElement, config: MapConfig): void {
@@ -84,6 +95,13 @@ export class LeafletMapAdapter implements MapAdapter {
     const border = MARKER_BORDER[theme]
     for (const marker of this.markers.values()) {
       marker.setIcon(buildIcon(color, border))
+    }
+
+    // Update existing line colors to match new theme
+    const lineColors = LINE_COLORS[theme]
+    for (const { outline, foreground } of this.lines.values()) {
+      outline.setStyle({ color: lineColors.outline })
+      foreground.setStyle({ color: lineColors.foreground })
     }
   }
 
@@ -153,32 +171,41 @@ export class LeafletMapAdapter implements MapAdapter {
     }
 
     const id = nextLineId()
-    const color = options?.color ?? 'rgba(255, 255, 255, 0.5)'
+    const lineColors = LINE_COLORS[this.currentTheme]
     const dashArray = options?.dashed ? '8, 8' : undefined
+    const coords: L.LatLngExpression[] = [
+      [from.lat, from.lng],
+      [to.lat, to.lng],
+    ]
 
-    const polyline = L.polyline(
-      [
-        [from.lat, from.lng],
-        [to.lat, to.lng],
-      ],
-      {
-        color,
-        weight: 2,
-        opacity: 0.7,
-        dashArray,
-      }
-    )
+    // Wider outline for contrast on any background
+    const outline = L.polyline(coords, {
+      color: lineColors.outline,
+      weight: 6,
+      opacity: 1,
+      dashArray,
+      lineCap: 'round',
+    }).addTo(this.map)
 
-    polyline.addTo(this.map)
-    this.lines.set(id, polyline)
+    // Thinner foreground accent line
+    const foreground = L.polyline(coords, {
+      color: options?.color ?? lineColors.foreground,
+      weight: 2,
+      opacity: 1,
+      dashArray,
+      lineCap: 'round',
+    }).addTo(this.map)
+
+    this.lines.set(id, { outline, foreground })
 
     return id
   }
 
   removeLine(id: string): void {
-    const line = this.lines.get(id)
-    if (line) {
-      line.remove()
+    const entry = this.lines.get(id)
+    if (entry) {
+      entry.outline.remove()
+      entry.foreground.remove()
       this.lines.delete(id)
     }
   }
@@ -194,8 +221,9 @@ export class LeafletMapAdapter implements MapAdapter {
 
   destroy(): void {
     this.clearMarkers()
-    for (const line of this.lines.values()) {
-      line.remove()
+    for (const { outline, foreground } of this.lines.values()) {
+      outline.remove()
+      foreground.remove()
     }
     this.lines.clear()
     if (this.map) {

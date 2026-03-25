@@ -376,7 +376,9 @@ export class GameService {
     breakdown: {
       baseScore: number
       cluePenalty: number
+      afterClues: number
       timeBonus: number
+      afterTime: number
       betMultiplier: number
     }
   } {
@@ -416,7 +418,9 @@ export class GameService {
       breakdown: {
         baseScore: score.base,
         cluePenalty: score.cluePenalty,
+        afterClues: score.afterClues,
         timeBonus: score.timeBonus,
+        afterTime: score.afterTime,
         betMultiplier: score.betMultiplier,
       },
     }
@@ -453,21 +457,23 @@ function calculateScore(
   timeLimit: number,
   hasBet: boolean,
   timedOut: boolean
-): { final: number; base: number; cluePenalty: number; timeBonus: number; betMultiplier: number } {
+): { final: number; base: number; cluePenalty: number; afterClues: number; timeBonus: number; afterTime: number; betMultiplier: number } {
   const base = Math.max(0, 5000 - distanceKm * 2)
   const cluePenalty = cluesRevealed * 0.15
   const timeBonus = timedOut ? 0 : timeRemaining / timeLimit
   const betMultiplier = hasBet ? 2 : 1
 
-  const final = Math.round(
-    base * (1 - cluePenalty) * (1 + timeBonus * 0.2) * betMultiplier
-  )
+  const afterClues = base * (1 - cluePenalty)
+  const afterTime = afterClues * (1 + timeBonus * 0.2)
+  const final = Math.round(afterTime * betMultiplier)
 
   return {
     final: Math.max(0, final),
     base: Math.round(base),
     cluePenalty: Math.round(cluePenalty * 100),
-    timeBonus: Math.round(timeBonus * 100),
+    afterClues: Math.round(afterClues),
+    timeBonus: Math.round(timeBonus * 0.2 * 100),
+    afterTime: Math.round(afterTime),
     betMultiplier,
   }
 }

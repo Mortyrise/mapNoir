@@ -112,7 +112,6 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
 
     // Draw dashed line between them
     adapter.drawLine(resultMarkers.guess, resultMarkers.actual, {
-      color: 'rgba(255, 255, 255, 0.4)',
       dashed: true,
     })
 
