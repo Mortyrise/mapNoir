@@ -45,12 +45,13 @@ El jugador:
 
 ### 🎯 Puntuación
 
-* Basada en **distancia real**
+* Basada en **distancia real**: `base = max(0, 5000 - distancia_km * 2)`
 * Modificada por:
 
-  * uso de recursos
-  * tiempo restante
-  * coherencia con pistas
+  * penalización por pistas usadas (-15% por pista)
+  * bonus por tiempo restante (hasta +20%)
+  * multiplicador de apuesta (x2)
+* Desglose muestra deltas de puntos (no acumulados)
 
 ---
 
@@ -81,23 +82,31 @@ Las pistas **no deben ser visibles directamente en la imagen**
 
 ### Tipos de pistas
 
-#### 🗣️ Auditivas / externas
+Todas las pistas usan **voz narrativa del informante** y priorizan **información no visible en la foto** (olores, sonidos, clima, comportamientos).
 
-* “Se escuchaba francés”
-* “Alguien mencionó euros”
+#### 🗣️ Auditivas (lo que se oía)
 
-#### 🌍 Contextuales
+* “Nuestro informante recuerda que las conversaciones en los bares se oían a un volumen altísimo”
+* “El contacto nos dice que se escuchaba el llamado a la oración desde varios puntos de la ciudad”
 
-* “Zona turística europea”
-* Quien nos dió la información recuerda que vio a gente con cajas de vinos -> Región vinícola”
+#### 🌍 Contextuales (sensaciones, olores, clima)
 
-#### 🧭 Geopolíticas
+* “La fuente nos dice que el olor a aceite de oliva frito lo impregnaba todo”
+* “Nuestro contacto recuerda una humedad sofocante — la ropa se pegaba al cuerpo”
 
-* “No es un país insular”
+#### 🧭 Geopolíticas (banderas parciales, moneda, idioma)
 
-#### 📜 Narrativas
+* “El contacto recuerda haber visto una bandera con mucho rojo y algo de amarillo”
+* “Nuestra fuente dice que no reconocía el alfabeto — no era ni latino ni cirílico”
 
-* “El sospechoso cruzó una frontera cercana”
+#### 📜 Narrativas (costumbres, comportamientos)
+
+* “Nuestro informante recuerda que los restaurantes estaban vacíos a las 20h — la gente cenaba pasadas las 22h”
+* “El contacto nos dice que le sirvieron comida extremadamente picante sin haberlo pedido”
+
+#### ❌ Negativas (lo que NO se observó)
+
+* “Nuestra intel indica que no hacía frío — descartamos países del norte de Europa”
 
 ---
 

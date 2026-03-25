@@ -22,16 +22,16 @@
 
 ## Fases
 
-### [Fase 0 — Fundación y Scaffolding](./fase-0-fundacion.md)
-Estructura del proyecto, abstracciones (repository pattern, adapters), dataset de países, deploy en VPS.
+### [Fase 0 — Fundación y Scaffolding](./fase-0-fundacion.md) ✅
+Estructura del proyecto, abstracciones (repository pattern, adapters), dataset de 40 países, i18n (EN/ES), theme toggle. Pendiente: deploy en VPS.
 
-### [Fase 1 — Core Gameplay](./fase-1-core-gameplay.md)
-Loop básico jugable: ver escena Mapillary → marcar en mapa → ver score por distancia.
+### [Fase 1 — Core Gameplay](./fase-1-core-gameplay.md) ✅
+Loop completo jugable: ver escena Mapillary → briefing → marcar en mapa → ver score con desglose detallado y línea visual en mapa de resultado.
 
-### [Fase 2 — Pistas y Recursos](./fase-2-pistas-recursos.md)
-Sistema de pistas narrativas, energía, timer, apuesta. La mecánica que diferencia Map Noir.
+### [Fase 2 — Pistas y Recursos](./fase-2-pistas-recursos.md) ✅
+1000 pistas por idioma (40 países × 5 categorías × 5), voz narrativa del informante, priorizando lo no-visual (olores, sonidos, comportamientos). Energía, timer, apuesta, movimiento. Desglose de score con deltas de puntos.
 
-### [Fase 3 — Partida Completa y Game Feel](./fase-3-partida-completa.md)
+### [Fase 3 — Partida Completa y Game Feel](./fase-3-partida-completa.md) ⬜ Siguiente
 Sesión de 5 rondas, narrativa detective, resumen final, texto compartible, pre-generación batch.
 
 ### [Fase 4 — Auth y Persistencia](./fase-4-auth-persistencia.md)
@@ -67,5 +67,5 @@ Fase 0 → Fase 1 → Fase 2 → Fase 3 → Fase 4 → Fase 5 → Fase 7
 1. **BUILD FOR CHANGE**: Adapters para mapa e imágenes. Repository pattern para datos. Swap sin reescritura.
 2. **Validar antes de construir**: Cada fase debe ser testeable con usuarios reales antes de pasar a la siguiente.
 3. **Coste cero**: No pagar por servicios hasta tener tracción demostrada.
-4. **Inglés primero**: Interfaz en inglés para máximo alcance. i18n post-MVP.
+4. **Bilingüe desde el inicio**: Interfaz en inglés y español con sistema i18n integrado.
 5. **Desktop-first, mobile-aceptable**: El gameplay necesita pantalla, pero debe ser usable en móvil.

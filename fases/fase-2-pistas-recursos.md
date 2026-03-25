@@ -22,118 +22,64 @@ Partida con:
 ## Tareas
 
 ### Base de datos de pistas
-- [ ] Ampliar `countries.json` con pools de pistas por tipo:
-  ```json
-  {
-    "ES": {
-      "clues": {
-        "auditory": [
-          "Un testigo afirma haber escuchado español",
-          "Se oían conversaciones en un idioma romance"
-        ],
-        "contextual": [
-          "La zona parece turística y mediterránea",
-          "Se observaron plantaciones de olivos en los alrededores"
-        ],
-        "geopolitical": [
-          "Es un país miembro de la Unión Europea",
-          "Conduce por la derecha"
-        ],
-        "narrative": [
-          "El sospechoso podría haber cruzado la frontera con Francia o Portugal",
-          "Las autoridades locales usan el euro"
-        ],
-        "negative": [
-          "No es un país insular",
-          "No está en el hemisferio sur"
-        ]
-      }
-    }
-  }
-  ```
-- [ ] Al menos 5 pistas por tipo por país (para los 30-50 países del MVP)
-- [ ] Validar que las pistas NO son deducibles directamente de la imagen
+- [x] Pistas en ficheros separados: `clues-es.json` y `clues-en.json`
+- [x] 5 categorías por país: auditory, contextual, geopolitical, narrative, negative
+- [x] 5 pistas por categoría por país = 25 pistas/país = 1000 pistas por idioma
+- [x] 40 países cubiertos en ambos idiomas
+- [x] Pistas NO deducibles de la imagen — priorizan lo no-visual:
+  - **auditory**: Sonidos, volumen de conversaciones, música, llamada a la oración
+  - **contextual**: Olores, sensación climática, atmósfera, humedad
+  - **geopolitical**: Banderas parciales/ambiguas, moneda, idioma (humanizado)
+  - **narrative**: Comportamientos, costumbres, horarios, experiencia gastronómica
+  - **negative**: Lo que NO se observó (para descartar regiones)
+- [x] Todas las pistas usan voz narrativa del informante ("Nuestro informante recuerda...", "El contacto nos dice...")
 
 ### Motor de generación de pistas
-- [ ] Servicio `ClueGenerator`:
-  ```typescript
-  interface ClueGenerator {
-    generateCluesForLocation(
-      country: CountryData,
-      difficulty: Difficulty
-    ): GeneratedClues
-
-    // Retorna: {
-    //   initial: Clue          // Gratis al empezar
-    //   purchasable: Clue[]    // Comprables con energía
-    // }
-  }
-  ```
-- [ ] Lógica de selección por dificultad:
-  - **Fácil**: Pista inicial fuerte (idioma, moneda). Pistas comprables también fuertes.
-  - **Media**: Pista inicial contextual. Mix de comprables.
-  - **Difícil**: Pista inicial narrativa/ambigua. Comprables también ambiguas.
-- [ ] Evitar pistas contradictorias en la misma partida
-- [ ] Endpoint `GET /api/game/new` ahora incluye `initialClue` en la respuesta
+- [x] Servicio `ClueGenerator` implementado con selección por dificultad:
+  - **Fácil**: Pista inicial de [auditory, geopolitical]. Comprables: contextual → narrative → negative
+  - **Media**: Pista inicial de [contextual, geopolitical]. Comprables: auditory → narrative → negative
+  - **Difícil**: Pista inicial de [narrative, negative]. Comprables: contextual → geopolitical → auditory
+- [x] Selección aleatoria dentro de cada categoría sin repeticiones
+- [x] Fallback si el país no tiene pistas en el pool
+- [x] Endpoint `POST /api/game/new` incluye `initialClue` en la respuesta
+- [x] Soporte de idioma (EN/ES) en la generación de pistas
 
 ### Sistema de energía
-- [ ] Estado de partida en servidor:
-  ```typescript
-  interface GameState {
-    id: string
-    sceneKey: string
-    actualLocation: { lat: number, lng: number }
-    country: string
-    difficulty: Difficulty
-    energy: number          // 2 (difícil) | 3 (media) | 4 (fácil)
-    energyUsed: number
-    cluesRevealed: number
-    hasBet: boolean
-    startTime: number
-    timeLimit: number       // 30s (difícil) | 45s (media) | 60s (fácil)
-  }
-  ```
-- [ ] Endpoint `POST /api/game/:id/action`:
+- [x] Estado de partida en servidor con: energy, movementUnlocked, hasBet, cluesRevealed, startTime, timeLimit
+- [x] Endpoint `POST /api/game/:id/action`:
   - `{ action: "move" }` → desbloquea movimiento en visor, -1 energía
   - `{ action: "clue" }` → devuelve siguiente pista, -1 energía
   - `{ action: "bet" }` → activa multiplicador x2, -1 energía
-  - Validar energía suficiente, devolver error si no
+  - Valida energía suficiente y acciones no duplicadas (move/bet solo una vez)
 
 ### Sistema de tiempo
-- [ ] Timer visible en UI (countdown)
-- [ ] Timer controlado por servidor (no confiar en cliente):
-  - `startTime` se registra en servidor al crear partida
-  - `POST /api/game/guess` rechaza si `now - startTime > timeLimit`
-- [ ] UI: timer cambia de color cuando queda poco tiempo (< 10s)
-- [ ] Auto-submit cuando se acaba el tiempo (guess en la posición actual del marcador, o penalización máxima si no hay marcador)
+- [x] Timer visible en UI (countdown) con componente `<Timer />`
+- [x] Timer controlado por servidor (startTime registrado al iniciar partida)
+- [x] Timer empieza al entrar en juego (tras briefing)
+- [x] Auto-submit configurable cuando se acaba el tiempo
 
 ### UI de recursos
-- [ ] Barra de energía (iconos o barra visual)
-- [ ] Botones de acción con coste visible:
-  - "Moverse (1 energía)"
-  - "Pedir pista (1 energía, -15% score)"
-  - "Apostar x2 (1 energía)"
-- [ ] Botones deshabilitados cuando no hay energía
-- [ ] Feedback visual al usar energía (animación de consumo)
+- [x] Componente `<ResourceBar />` con barra de energía visual (pips)
+- [x] Botones de acción: Move, Clue, Bet — con estados y tooltips traducidos
+- [x] Botones deshabilitados cuando no hay energía o acción ya usada
 
 ### Panel de pistas
-- [ ] Pista inicial visible al empezar (estilo narrativo/detective)
-- [ ] Pistas compradas aparecen en un panel lateral o inferior
-- [ ] Formato narrativo: no "Idioma: español" sino "Un testigo afirma haber escuchado español"
+- [x] Componente `<CluePanel />` con pista inicial visible al empezar
+- [x] Pistas compradas aparecen en el panel con estilo narrativo/detective
+- [x] Pantalla de briefing antes de empezar la ronda con detalles del caso
 
 ### Ajuste de score
-- [ ] Fórmula actualizada:
+- [x] Fórmula implementada:
   ```
-  base_score = max(0, 5000 - distancia_km * factor)
-
-  // Modificadores
-  clue_penalty = cluesRevealed * 0.15    // -15% por pista comprada
-  time_bonus = timeRemaining / timeLimit  // 0-1, porcentaje de tiempo sobrante
+  base_score = max(0, 5000 - distancia_km * 2)
+  clue_penalty = cluesRevealed * 0.15
+  time_bonus = timeRemaining / timeLimit (effective: * 0.2, max +20%)
   bet_multiplier = hasBet ? 2 : 1
-
-  final_score = base_score * (1 - clue_penalty) * (1 + time_bonus * 0.2) * bet_multiplier
+  final_score = round(base * (1 - clue_penalty) * (1 + timeBonus * 0.2) * betMultiplier)
   ```
-- [ ] El score siempre se calcula en servidor
+- [x] Score siempre calculado en servidor
+- [x] Servidor envía valores intermedios (afterClues, afterTime) para desglose exacto sin errores de redondeo
+- [x] Cliente muestra desglose con deltas de puntos (no acumulados): base /5000, penalización, bonus, apuesta
 
 ## Decisiones técnicas
 
@@ -173,10 +119,10 @@ Partida con:
 
 ## Criterio de "done"
 
-- [ ] Al empezar partida se ve 1 pista narrativa
-- [ ] Se puede comprar al menos 1 pista adicional con energía
-- [ ] Se puede desbloquear movimiento con energía
-- [ ] Se puede apostar x2
-- [ ] Timer visible y funcional
-- [ ] Score final refleja uso de pistas, tiempo y apuesta
-- [ ] No se puede actuar sin energía suficiente
+- [x] Al empezar partida se ve 1 pista narrativa con voz del informante
+- [x] Se puede comprar hasta 3 pistas adicionales con energía
+- [x] Se puede desbloquear movimiento con energía
+- [x] Se puede apostar x2
+- [x] Timer visible y funcional
+- [x] Score final refleja uso de pistas, tiempo y apuesta con desglose claro
+- [x] No se puede actuar sin energía suficiente

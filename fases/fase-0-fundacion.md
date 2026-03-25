@@ -15,8 +15,8 @@ Proyecto arrancable con:
 ## Tareas
 
 ### Frontend (React + Vite)
-- [ ] Scaffolding con `npm create vite@latest` (template React + TypeScript)
-- [ ] Estructura de carpetas:
+- [x] Scaffolding con `npm create vite@latest` (template React + TypeScript)
+- [x] Estructura de carpetas:
   ```
   src/
     components/     # Componentes UI
@@ -24,63 +24,37 @@ Proyecto arrancable con:
     hooks/          # Custom hooks
     services/       # Llamadas API al backend
     types/          # TypeScript interfaces
-    pages/          # Páginas/vistas principales
+    styles/         # Tokens y variables CSS
+    i18n/           # Traducciones (EN/ES)
   ```
-- [ ] Instalar y configurar Leaflet (`react-leaflet`)
-- [ ] Crear `MapAdapter` interface para abstraer el proveedor de mapas
-- [ ] Componente `<GameMap />` que usa el adapter
-- [ ] Verificar que el mapa renderiza correctamente con OSM tiles
+- [x] Instalar y configurar Leaflet (adapter propio sin react-leaflet)
+- [x] Crear `MapAdapter` interface para abstraer el proveedor de mapas
+- [x] Componente `<GameMap />` que usa el adapter
+- [x] Verificar que el mapa renderiza correctamente con CartoDB tiles (dark/light)
+- [x] **Extra**: Sistema i18n con soporte inglés/español
+- [x] **Extra**: Theme toggle dark/light mode con tokens CSS
 
 ### Backend (Node + Express)
-- [ ] Scaffolding con TypeScript
-- [ ] Estructura de carpetas:
+- [x] Scaffolding con TypeScript
+- [x] Estructura de carpetas:
   ```
   src/
     routes/         # Endpoints
     controllers/    # Lógica de request/response
-    services/       # Lógica de negocio
-    repositories/   # Abstracción de datos (BUILD FOR CHANGE)
-    adapters/       # Geocoding, imágenes
-    data/           # JSONs estáticos (países, niveles)
+    services/       # Lógica de negocio (GameService, ClueGenerator)
+    repositories/   # Abstracción de datos
+    data/           # JSONs estáticos (países, pistas, location pool)
     types/          # TypeScript interfaces
   ```
-- [ ] Patrón Repository con implementación JSON inicial:
-  ```typescript
-  // Interface
-  interface GameRepository {
-    getRandomLocation(): Promise<Location>
-    getCountryData(code: string): Promise<CountryData>
-    saveGameResult(result: GameResult): Promise<void>
-  }
-
-  // Implementación MVP (JSON files)
-  class JsonGameRepository implements GameRepository { ... }
-
-  // Futuro (swap sin tocar lógica de negocio)
-  class PostgresGameRepository implements GameRepository { ... }
-  ```
-- [ ] Endpoint health check: `GET /api/health`
-- [ ] CORS configurado para desarrollo local
+- [x] Patrón Repository con implementación JSON inicial
+- [x] Endpoint health check: `GET /api/health`
+- [x] CORS configurado para desarrollo local
 
 ### Dataset base de países
-- [ ] Crear `countries.json` con datos básicos por país:
-  ```json
-  {
-    "ES": {
-      "name": "Spain",
-      "languages": ["es", "ca", "eu", "gl"],
-      "driving": "right",
-      "climate": ["mediterranean", "oceanic", "semiarid"],
-      "currency": "EUR",
-      "region": "Europe",
-      "subregion": "Southern Europe",
-      "capital": "Madrid",
-      "funFacts": ["..."],
-      "cluePool": { ... }
-    }
-  }
-  ```
-- [ ] Incluir al menos 30-50 países con datos verificados
+- [x] Crear `countries.json` con datos básicos por país
+- [x] 40 países incluidos con datos verificados
+- [x] Ficheros de pistas separados: `clues-en.json` y `clues-es.json`
+- [x] Pool de ubicaciones pre-validadas: `location-pool.json`
 
 ### Infra / VPS
 - [ ] Nginx como reverse proxy
@@ -116,8 +90,8 @@ Proyecto arrancable con:
 
 ## Criterio de "done"
 
-- [ ] `npm run dev` arranca frontend con mapa Leaflet visible
-- [ ] `npm run dev:server` arranca backend y responde en `/api/health`
-- [ ] Se puede hacer click en el mapa y obtener coordenadas
+- [x] `npm run dev` arranca frontend con mapa Leaflet visible
+- [x] `npm run dev:server` arranca backend y responde en `/api/health`
+- [x] Se puede hacer click en el mapa y obtener coordenadas
 - [ ] Desplegado en VPS y accesible desde mapnoir.com
-- [ ] `countries.json` con al menos 30 países completos
+- [x] `countries.json` con 40 países completos
