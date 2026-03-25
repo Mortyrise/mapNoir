@@ -1,3 +1,6 @@
+import type { Difficulty, GameAction, NewGameResponse, ActionResponse, GuessResponse } from '../types'
+import type { Language } from '../i18n/translations'
+
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -18,16 +21,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 export const api = {
   healthCheck: () => request<{ status: string }>('/health'),
 
-  newGame: () =>
-    request<{
-      gameId: string
-      imageId: string
-      thumbUrl: string
-      provider: 'mapillary' | 'google'
-      searchLat?: number
-      searchLng?: number
-    }>('/game/new', {
+  newGame: (difficulty: Difficulty = 'medium', language: Language = 'en') =>
+    request<NewGameResponse>('/game/new', {
       method: 'POST',
+      body: JSON.stringify({ difficulty, language }),
     }),
 
   reportPanoLocation: (gameId: string, lat: number, lng: number) =>
@@ -36,12 +33,20 @@ export const api = {
       body: JSON.stringify({ gameId, lat, lng }),
     }),
 
+  startTimer: (gameId: string) =>
+    request<{ startTime: number; timeLimit: number }>(`/game/${gameId}/start`, {
+      method: 'POST',
+    }),
+
+  performAction: (gameId: string, action: GameAction) =>
+    request<ActionResponse>(`/game/${gameId}/action`, {
+      method: 'POST',
+      body: JSON.stringify({ action }),
+    }),
+
   submitGuess: (gameId: string, lat: number, lng: number) =>
-    request<{ score: number; distanceKm: number; actualLocation: { lat: number; lng: number } }>(
-      '/game/guess',
-      {
-        method: 'POST',
-        body: JSON.stringify({ gameId, lat, lng }),
-      }
-    ),
+    request<GuessResponse>('/game/guess', {
+      method: 'POST',
+      body: JSON.stringify({ gameId, lat, lng }),
+    }),
 }

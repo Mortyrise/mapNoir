@@ -24,6 +24,40 @@ export interface CountryData {
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
+export type ClueType = 'auditory' | 'contextual' | 'geopolitical' | 'narrative' | 'negative'
+
+export interface CountryClues {
+  auditory: string[]
+  contextual: string[]
+  geopolitical: string[]
+  narrative: string[]
+  negative: string[]
+}
+
+export interface GeneratedClues {
+  initial: string
+  purchasable: string[]
+}
+
+export type GameAction = 'move' | 'clue' | 'bet'
+
+export type Language = 'en' | 'es'
+
+export interface ActiveGameState {
+  id: string
+  difficulty: Difficulty
+  energy: number
+  energyUsed: number
+  cluesRevealed: number
+  hasBet: boolean
+  startTime: number
+  timeLimit: number
+  movementUnlocked: boolean
+  initialClue: string
+  revealedClues: string[]
+  purchasableClues: string[]
+}
+
 export interface GameResult {
   id: string
   location: Location

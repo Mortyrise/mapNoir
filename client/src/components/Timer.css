@@ -1,0 +1,51 @@
+/* ============================================
+   TIMER
+   ============================================ */
+.timer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.timer-bar-track {
+  flex: 1;
+  height: 6px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.timer-bar-fill {
+  height: 100%;
+  background-color: var(--color-accent-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.1s linear;
+}
+
+.timer-text {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-accent-primary);
+  min-width: 3.5ch;
+  text-align: right;
+}
+
+/* Urgent state (< 10s) */
+.timer-urgent .timer-bar-fill {
+  background-color: var(--color-danger);
+}
+
+.timer-urgent .timer-text {
+  color: #c44;
+  animation: timer-pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes timer-pulse {
+  from { opacity: 1; }
+  to { opacity: 0.5; }
+}

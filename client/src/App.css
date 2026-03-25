@@ -120,6 +120,125 @@
   gap: var(--space-2);
 }
 
+.difficulty-options .btn {
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-4);
+}
+
+.difficulty-detail {
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+/* -------------------------
+   BRIEFING SCREEN
+   Case dossier before timer starts
+   ------------------------- */
+.briefing-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+}
+
+.briefing-content {
+  text-align: center;
+  max-width: 560px;
+  padding: var(--space-8) var(--space-6);
+}
+
+.briefing-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  color: var(--color-accent-primary);
+  margin: 0 0 var(--space-2);
+  letter-spacing: 0.03em;
+}
+
+.briefing-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin: 0 0 var(--space-8);
+}
+
+.briefing-clue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glow);
+  margin-bottom: var(--space-6);
+}
+
+.briefing-clue .clue-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-primary);
+  color: var(--color-accent-primary);
+}
+
+.briefing-clue-text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-style: italic;
+  color: var(--color-text-primary);
+  line-height: var(--leading-relaxed);
+}
+
+.briefing-meta {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.briefing-meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.briefing-meta-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+.briefing-meta-value {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  color: var(--color-accent-primary);
+  font-weight: 700;
+}
+
+.briefing-start-btn {
+  animation: briefing-pulse 2s ease-in-out infinite;
+}
+
+@keyframes briefing-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.4); }
+  50% { box-shadow: 0 0 20px 4px rgba(201, 168, 76, 0.2); }
+}
+
 /* -------------------------
    GAME LAYOUT (playing)
    Scene large, Map compact + expandable
@@ -127,8 +246,16 @@
 .scene-panel {
   display: flex;
   flex-direction: column;
+  gap: var(--space-2);
   min-height: 0; /* allow shrinking in grid */
   overflow: hidden;
+}
+
+.scene-hud {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex-shrink: 0;
 }
 
 .scene-panel .scene-viewer {
@@ -243,6 +370,49 @@
   color: var(--color-text-tertiary);
 }
 
+/* Result breakdown */
+.result-breakdown {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.breakdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.breakdown-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.breakdown-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.breakdown-penalty .breakdown-value {
+  color: #c44;
+}
+
+.breakdown-bet .breakdown-value {
+  color: var(--color-accent-primary);
+}
+
 .result-map {
   min-height: 400px;
   border-radius: var(--radius-lg);
@@ -257,6 +427,49 @@
   display: flex;
   justify-content: center;
   padding: var(--space-4) 0;
+}
+
+/* -------------------------
+   HEADER CONTROLS
+   ------------------------- */
+.app-header-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* -------------------------
+   LANGUAGE SELECTOR
+   ------------------------- */
+.language-selector {
+  display: flex;
+  gap: 2px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+
+.lang-btn {
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  letter-spacing: 0.05em;
+}
+
+.lang-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.lang-btn-active {
+  color: var(--color-bg-primary);
+  background-color: var(--color-accent-primary);
 }
 
 /* -------------------------

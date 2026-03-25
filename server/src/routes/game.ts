@@ -20,6 +20,12 @@ export function createGameRouter(controller: GameController): Router {
   // POST /api/game/report-pano
   router.post('/report-pano', controller.reportPanoLocation)
 
+  // POST /api/game/:id/start — starts the timer after briefing
+  router.post('/:id/start', controller.startTimer)
+
+  // POST /api/game/:id/action
+  router.post('/:id/action', controller.performAction)
+
   // POST /api/game/guess
   router.post('/guess', controller.submitGuess)
 

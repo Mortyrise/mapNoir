@@ -3,7 +3,8 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 import { GameRepository } from '../repositories/GameRepository'
 import { MapillaryAdapter } from '../adapters/MapillaryAdapter'
-import { Location } from '../types'
+import { ClueGenerator } from './ClueGenerator'
+import type { Location, Difficulty, GameAction, Language } from '../types'
 
 interface ActiveGame {
   id: string
@@ -13,6 +14,18 @@ interface ActiveGame {
   thumbUrl: string
   provider: 'mapillary' | 'google'
   createdAt: number
+  // Phase 2: resources
+  difficulty: Difficulty
+  energy: number
+  energyUsed: number
+  cluesRevealed: number
+  hasBet: boolean
+  startTime: number
+  timeLimit: number // seconds
+  movementUnlocked: boolean
+  initialClue: string
+  revealedClues: string[]
+  purchasableClues: string[] // clues available for purchase (not yet revealed)
 }
 
 interface PoolEntry {
@@ -29,9 +42,23 @@ const activeGames = new Map<string, ActiveGame>()
 const GAME_TTL = 15 * 60 * 1000 // 15 minutes
 const POOL_PATH = path.join(__dirname, '..', 'data', 'location-pool.json')
 
+// Difficulty settings
+const ENERGY_BY_DIFFICULTY: Record<Difficulty, number> = {
+  easy: 4,
+  medium: 3,
+  hard: 2,
+}
+
+const TIME_LIMIT_BY_DIFFICULTY: Record<Difficulty, number> = {
+  easy: 60,
+  medium: 45,
+  hard: 30,
+}
+
 export class GameService {
   private pool: PoolEntry[] | null = null
   private poolLoadAttempted = false
+  private clueGenerator = new ClueGenerator()
 
   constructor(
     private readonly repo: GameRepository,
@@ -68,28 +95,59 @@ export class GameService {
     return provider === 'google' ? 'google' : 'mapillary'
   }
 
-  async createGame(): Promise<{
+  async createGame(difficulty: Difficulty = 'medium', language: Language = 'en'): Promise<{
     gameId: string
     imageId: string
     thumbUrl: string
     provider: 'mapillary' | 'google'
     searchLat?: number
     searchLng?: number
+    // Phase 2 additions
+    initialClue: string
+    energy: number
+    timeLimit: number
+    difficulty: Difficulty
   }> {
     this.cleanupExpiredGames()
 
-    // Google Street View provider: pick a random location and let the client find the nearest panorama
-    if (this.sceneProvider === 'google') {
-      const location = await this.repo.getRandomLocation()
-      const game: ActiveGame = {
+    const energy = ENERGY_BY_DIFFICULTY[difficulty]
+    const timeLimit = TIME_LIMIT_BY_DIFFICULTY[difficulty]
+
+    // Helper to build a game from location data
+    const buildGame = (
+      location: Location,
+      countryCode: string,
+      imageId: string,
+      thumbUrl: string,
+      provider: 'mapillary' | 'google'
+    ): ActiveGame => {
+      const clues = this.clueGenerator.generateCluesForLocation(countryCode, difficulty, language)
+      return {
         id: uuidv4(),
         actualLocation: location,
-        countryCode: '',
-        imageId: 'google',
-        thumbUrl: '',
-        provider: 'google',
+        countryCode,
+        imageId,
+        thumbUrl,
+        provider,
         createdAt: Date.now(),
+        difficulty,
+        energy,
+        energyUsed: 0,
+        cluesRevealed: 0,
+        hasBet: false,
+        startTime: 0, // Set when player starts the timer (after briefing)
+        timeLimit,
+        movementUnlocked: false,
+        initialClue: clues.initial,
+        revealedClues: [],
+        purchasableClues: clues.purchasable,
       }
+    }
+
+    // Google Street View provider
+    if (this.sceneProvider === 'google') {
+      const location = await this.repo.getRandomLocation()
+      const game = buildGame(location, '', 'google', '', 'google')
       activeGames.set(game.id, game)
       return {
         gameId: game.id,
@@ -98,40 +156,52 @@ export class GameService {
         provider: 'google',
         searchLat: location.lat,
         searchLng: location.lng,
+        initialClue: game.initialClue,
+        energy: game.energy,
+        timeLimit: game.timeLimit,
+        difficulty: game.difficulty,
       }
     }
 
     // Mapillary provider
     if (!this.mapillary) {
       const location = await this.repo.getRandomLocation()
-      const game: ActiveGame = {
-        id: uuidv4(),
-        actualLocation: location,
-        countryCode: '',
-        imageId: 'placeholder',
-        thumbUrl: '',
-        provider: 'mapillary',
-        createdAt: Date.now(),
-      }
+      const game = buildGame(location, '', 'placeholder', '', 'mapillary')
       activeGames.set(game.id, game)
-      return { gameId: game.id, imageId: game.imageId, thumbUrl: game.thumbUrl, provider: 'mapillary' }
+      return {
+        gameId: game.id,
+        imageId: game.imageId,
+        thumbUrl: game.thumbUrl,
+        provider: 'mapillary',
+        initialClue: game.initialClue,
+        energy: game.energy,
+        timeLimit: game.timeLimit,
+        difficulty: game.difficulty,
+      }
     }
 
     // Strategy 1: Use pre-generated pool (instant, reliable)
     const pool = await this.loadPool()
     if (pool.length > 0) {
       const entry = pool[Math.floor(Math.random() * pool.length)]
-      const game: ActiveGame = {
-        id: uuidv4(),
-        actualLocation: { lat: entry.lat, lng: entry.lng },
-        countryCode: entry.countryCode,
-        imageId: entry.imageId,
-        thumbUrl: entry.thumbUrl,
-        provider: 'mapillary',
-        createdAt: Date.now(),
-      }
+      const game = buildGame(
+        { lat: entry.lat, lng: entry.lng },
+        entry.countryCode,
+        entry.imageId,
+        entry.thumbUrl,
+        'mapillary'
+      )
       activeGames.set(game.id, game)
-      return { gameId: game.id, imageId: game.imageId, thumbUrl: game.thumbUrl, provider: 'mapillary' }
+      return {
+        gameId: game.id,
+        imageId: game.imageId,
+        thumbUrl: game.thumbUrl,
+        provider: 'mapillary',
+        initialClue: game.initialClue,
+        energy: game.energy,
+        timeLimit: game.timeLimit,
+        difficulty: game.difficulty,
+      }
     }
 
     // Strategy 2: Live search (slow fallback)
@@ -152,20 +222,24 @@ export class GameService {
       const idx = results.findIndex((r) => r !== null)
       if (idx !== -1) {
         const image = results[idx]!
-        const game: ActiveGame = {
-          id: uuidv4(),
-          actualLocation: {
-            lat: image.geometry.coordinates[1],
-            lng: image.geometry.coordinates[0],
-          },
-          countryCode: '',
-          imageId: String(image.id),
-          thumbUrl: image.thumb_2048_url,
-          provider: 'mapillary',
-          createdAt: Date.now(),
-        }
+        const game = buildGame(
+          { lat: image.geometry.coordinates[1], lng: image.geometry.coordinates[0] },
+          '',
+          String(image.id),
+          image.thumb_2048_url,
+          'mapillary'
+        )
         activeGames.set(game.id, game)
-        return { gameId: game.id, imageId: game.imageId, thumbUrl: game.thumbUrl, provider: 'mapillary' }
+        return {
+          gameId: game.id,
+          imageId: game.imageId,
+          thumbUrl: game.thumbUrl,
+          provider: 'mapillary',
+          initialClue: game.initialClue,
+          energy: game.energy,
+          timeLimit: game.timeLimit,
+          difficulty: game.difficulty,
+        }
       }
     }
 
@@ -179,6 +253,119 @@ export class GameService {
     }
   }
 
+  startTimer(gameId: string): { startTime: number; timeLimit: number } {
+    const game = activeGames.get(gameId)
+    if (!game) {
+      throw new Error('Game not found or expired')
+    }
+    if (game.startTime !== 0) {
+      // Already started — return current state
+      return { startTime: game.startTime, timeLimit: game.timeLimit }
+    }
+    game.startTime = Date.now()
+    return { startTime: game.startTime, timeLimit: game.timeLimit }
+  }
+
+  performAction(
+    gameId: string,
+    action: GameAction
+  ): {
+    success: boolean
+    energy: number
+    clue?: string
+    movementUnlocked?: boolean
+    hasBet?: boolean
+  } {
+    const game = activeGames.get(gameId)
+    if (!game) {
+      throw new Error('Game not found or expired')
+    }
+
+    // Auto-start timer if not started (safety net)
+    if (game.startTime === 0) {
+      game.startTime = Date.now()
+    }
+
+    // Check timer
+    const elapsed = (Date.now() - game.startTime) / 1000
+    if (elapsed > game.timeLimit) {
+      throw new Error('Time has expired')
+    }
+
+    // Check energy
+    if (game.energy <= 0) {
+      throw new Error('Not enough energy')
+    }
+
+    switch (action) {
+      case 'move': {
+        if (game.movementUnlocked) {
+          throw new Error('Movement already unlocked')
+        }
+        game.energy -= 1
+        game.energyUsed += 1
+        game.movementUnlocked = true
+        return {
+          success: true,
+          energy: game.energy,
+          movementUnlocked: true,
+        }
+      }
+      case 'clue': {
+        if (game.purchasableClues.length === 0) {
+          throw new Error('No more clues available')
+        }
+        game.energy -= 1
+        game.energyUsed += 1
+        game.cluesRevealed += 1
+        const clue = game.purchasableClues.shift()!
+        game.revealedClues.push(clue)
+        return {
+          success: true,
+          energy: game.energy,
+          clue,
+        }
+      }
+      case 'bet': {
+        if (game.hasBet) {
+          throw new Error('Already placed a bet')
+        }
+        game.energy -= 1
+        game.energyUsed += 1
+        game.hasBet = true
+        return {
+          success: true,
+          energy: game.energy,
+          hasBet: true,
+        }
+      }
+      default:
+        throw new Error('Invalid action')
+    }
+  }
+
+  getGameState(gameId: string): {
+    energy: number
+    timeRemaining: number
+    cluesRevealed: number
+    hasBet: boolean
+    movementUnlocked: boolean
+  } | null {
+    const game = activeGames.get(gameId)
+    if (!game) return null
+
+    const elapsed = (Date.now() - game.startTime) / 1000
+    const timeRemaining = Math.max(0, game.timeLimit - elapsed)
+
+    return {
+      energy: game.energy,
+      timeRemaining,
+      cluesRevealed: game.cluesRevealed,
+      hasBet: game.hasBet,
+      movementUnlocked: game.movementUnlocked,
+    }
+  }
+
   submitGuess(
     gameId: string,
     guess: Location
@@ -186,6 +373,12 @@ export class GameService {
     score: number
     distanceKm: number
     actualLocation: Location
+    breakdown: {
+      baseScore: number
+      cluePenalty: number
+      timeBonus: number
+      betMultiplier: number
+    }
   } {
     this.cleanupExpiredGames()
 
@@ -194,16 +387,38 @@ export class GameService {
       throw new Error('Game not found or expired')
     }
 
+    // Auto-start timer if not started (safety net)
+    if (game.startTime === 0) {
+      game.startTime = Date.now()
+    }
+
     const distanceKm = haversineDistance(game.actualLocation, guess)
-    const score = calculateScore(distanceKm)
+    const elapsed = (Date.now() - game.startTime) / 1000
+    const timeRemaining = Math.max(0, game.timeLimit - elapsed)
+    const timedOut = elapsed > game.timeLimit
+
+    const score = calculateScore(
+      distanceKm,
+      game.cluesRevealed,
+      timeRemaining,
+      game.timeLimit,
+      game.hasBet,
+      timedOut
+    )
 
     // Remove game from active (one guess per game)
     activeGames.delete(gameId)
 
     return {
-      score,
+      score: score.final,
       distanceKm: Math.round(distanceKm * 10) / 10,
       actualLocation: game.actualLocation, // NOW we reveal it
+      breakdown: {
+        baseScore: score.base,
+        cluePenalty: score.cluePenalty,
+        timeBonus: score.timeBonus,
+        betMultiplier: score.betMultiplier,
+      },
     }
   }
 }
@@ -225,7 +440,34 @@ function toRad(deg: number): number {
   return deg * (Math.PI / 180)
 }
 
-// Score: 5000 max, decreases with distance (factor 2 = 0 points at 2500km)
-function calculateScore(distanceKm: number): number {
-  return Math.max(0, Math.round(5000 - distanceKm * 2))
+// Phase 2 scoring formula
+// base_score = max(0, 5000 - distancia_km * factor)
+// clue_penalty = cluesRevealed * 0.15
+// time_bonus = timeRemaining / timeLimit (0-1)
+// bet_multiplier = hasBet ? 2 : 1
+// final_score = base_score * (1 - clue_penalty) * (1 + time_bonus * 0.2) * bet_multiplier
+function calculateScore(
+  distanceKm: number,
+  cluesRevealed: number,
+  timeRemaining: number,
+  timeLimit: number,
+  hasBet: boolean,
+  timedOut: boolean
+): { final: number; base: number; cluePenalty: number; timeBonus: number; betMultiplier: number } {
+  const base = Math.max(0, 5000 - distanceKm * 2)
+  const cluePenalty = cluesRevealed * 0.15
+  const timeBonus = timedOut ? 0 : timeRemaining / timeLimit
+  const betMultiplier = hasBet ? 2 : 1
+
+  const final = Math.round(
+    base * (1 - cluePenalty) * (1 + timeBonus * 0.2) * betMultiplier
+  )
+
+  return {
+    final: Math.max(0, final),
+    base: Math.round(base),
+    cluePenalty: Math.round(cluePenalty * 100),
+    timeBonus: Math.round(timeBonus * 100),
+    betMultiplier,
+  }
 }

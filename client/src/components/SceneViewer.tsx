@@ -13,6 +13,7 @@ interface SceneViewerProps {
   googleApiKey?: string
   // Common
   interactive?: boolean
+  t: (key: string) => string
 }
 
 export function SceneViewer(props: SceneViewerProps) {
@@ -34,14 +35,15 @@ export function SceneViewer(props: SceneViewerProps) {
         imageId={props.imageId}
         accessToken={props.mapillaryToken}
         interactive={props.interactive}
+        t={props.t}
       />
     )
   }
 
   return (
     <div className="scene-viewer scene-viewer-placeholder">
-      <p>No scene provider configured</p>
-      <p className="scene-viewer-hint">Set SCENE_PROVIDER in .env</p>
+      <p>{props.t('scene.noProvider')}</p>
+      <p className="scene-viewer-hint">{props.t('scene.hint')}</p>
     </div>
   )
 }

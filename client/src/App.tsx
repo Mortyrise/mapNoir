@@ -1,15 +1,24 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { GameMap } from './components/GameMap'
 import { SceneViewer } from './components/SceneViewer'
 import { ThemeToggle } from './components/ThemeToggle'
+import { Timer } from './components/Timer'
+import { ResourceBar } from './components/ResourceBar'
+import { CluePanel } from './components/CluePanel'
+import { LanguageSelector } from './components/LanguageSelector'
 import { useTheme } from './hooks/useTheme'
+import { useLanguage } from './hooks/useLanguage'
+import { useTranslation } from './hooks/useTranslation'
 import { api } from './services/api'
 import './components/GameMap.css'
 import './components/SceneViewer.css'
+import './components/Timer.css'
+import './components/ResourceBar.css'
+import './components/CluePanel.css'
 import './App.css'
-import type { LatLng } from './types'
+import type { LatLng, Difficulty, GameAction, ScoreBreakdown } from './types'
 
-type GameState = 'idle' | 'playing' | 'result'
+type GameState = 'idle' | 'briefing' | 'playing' | 'result'
 
 interface GameData {
   gameId: string
@@ -17,6 +26,19 @@ interface GameData {
   provider: 'mapillary' | 'google'
   searchLat?: number
   searchLng?: number
+  initialClue: string
+  energy: number
+  maxEnergy: number
+  timeLimit: number
+  difficulty: Difficulty
+}
+
+interface ResourceState {
+  energy: number
+  movementUnlocked: boolean
+  hasBet: boolean
+  revealedClues: string[]
+  cluesAvailable: number
 }
 
 interface ResultData {
@@ -24,58 +46,104 @@ interface ResultData {
   distanceKm: number
   actualLocation: LatLng
   guessLocation: LatLng
+  breakdown: ScoreBreakdown
 }
 
 const MAPILLARY_TOKEN = import.meta.env.MAPILLARY_TOKEN || ''
 const GOOGLE_API_KEY = import.meta.env.GOOGLE_MAPS_API_KEY || ''
 
+const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
+
 function App() {
   const { theme, toggleTheme } = useTheme()
+  const { language, setLanguage } = useLanguage()
+  const t = useTranslation(language)
+
   const [gameState, setGameState] = useState<GameState>('idle')
   const [gameData, setGameData] = useState<GameData | null>(null)
   const [resultData, setResultData] = useState<ResultData | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(null)
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [resources, setResources] = useState<ResourceState>({
+    energy: 3,
+    movementUnlocked: false,
+    hasBet: false,
+    revealedClues: [],
+    cluesAvailable: 3,
+  })
+
+  const gameIdRef = useRef<string | null>(null)
+  const selectedLocationRef = useRef<LatLng | null>(null)
+  selectedLocationRef.current = selectedLocation
 
   const startGame = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const data = await api.newGame()
-      setGameData({
+      const data = await api.newGame(difficulty, language)
+      const gd: GameData = {
         gameId: data.gameId,
         imageId: data.imageId,
         provider: data.provider,
         searchLat: data.searchLat,
         searchLng: data.searchLng,
-      })
+        initialClue: data.initialClue,
+        energy: data.energy,
+        maxEnergy: data.energy,
+        timeLimit: data.timeLimit,
+        difficulty: data.difficulty,
+      }
+      setGameData(gd)
+      gameIdRef.current = data.gameId
       setSelectedLocation(null)
+      selectedLocationRef.current = null
       setResultData(null)
-      setGameState('playing')
+      setResources({
+        energy: data.energy,
+        movementUnlocked: false,
+        hasBet: false,
+        revealedClues: [],
+        cluesAvailable: 3,
+      })
+      // Go to briefing instead of playing — timer not started yet
+      setGameState('briefing')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to start game'
-      setError(msg.includes('street-level')
-        ? 'Could not find a scene. Try again!'
-        : msg)
+      setError(msg.includes('street-level') ? t('error.noScene') : msg)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [difficulty, language, t])
 
-  const confirmGuess = useCallback(async () => {
-    if (!gameData || !selectedLocation) return
+  // Player finished reading the briefing, start the timer and show the scene
+  const startInvestigation = useCallback(async () => {
+    if (!gameData) return
+    try {
+      await api.startTimer(gameData.gameId)
+      setGameState('playing')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start timer')
+    }
+  }, [gameData])
+
+  const submitGuess = useCallback(async (guessLocation: LatLng | null) => {
+    const currentGameId = gameIdRef.current
+    if (!currentGameId) return
+    gameIdRef.current = null
+
     setLoading(true)
     setError(null)
     try {
-      const result = await api.submitGuess(
-        gameData.gameId,
-        selectedLocation.lat,
-        selectedLocation.lng
-      )
+      const loc = guessLocation || { lat: 0, lng: 0 }
+      const result = await api.submitGuess(currentGameId, loc.lat, loc.lng)
       setResultData({
-        ...result,
-        guessLocation: selectedLocation,
+        score: result.score,
+        distanceKm: result.distanceKm,
+        actualLocation: result.actualLocation,
+        guessLocation: loc,
+        breakdown: result.breakdown,
       })
       setGameState('result')
     } catch (err) {
@@ -83,7 +151,37 @@ function App() {
     } finally {
       setLoading(false)
     }
-  }, [gameData, selectedLocation])
+  }, [])
+
+  const confirmGuess = useCallback(async () => {
+    await submitGuess(selectedLocation)
+  }, [selectedLocation, submitGuess])
+
+  const handleTimeUp = useCallback(() => {
+    submitGuess(selectedLocationRef.current)
+  }, [submitGuess])
+
+  const handleAction = useCallback(async (action: GameAction) => {
+    if (!gameData) return
+    setError(null)
+    try {
+      const result = await api.performAction(gameData.gameId, action)
+      setResources(prev => ({
+        ...prev,
+        energy: result.energy,
+        movementUnlocked: result.movementUnlocked ?? prev.movementUnlocked,
+        hasBet: result.hasBet ?? prev.hasBet,
+        revealedClues: result.clue
+          ? [...prev.revealedClues, result.clue]
+          : prev.revealedClues,
+        cluesAvailable: result.clue
+          ? prev.cluesAvailable - 1
+          : prev.cluesAvailable,
+      }))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Action failed')
+    }
+  }, [gameData])
 
   const handleLocationSelect = useCallback((location: LatLng) => {
     setSelectedLocation(location)
@@ -94,10 +192,13 @@ function App() {
       <header className="app-header">
         <div className="app-header-content">
           <div className="app-brand">
-            <h1 className="app-title">Map Noir</h1>
-            <p className="app-subtitle">Last Known Location</p>
+            <h1 className="app-title">{t('app.title')}</h1>
+            <p className="app-subtitle">{t('app.subtitle')}</p>
           </div>
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          <div className="app-header-controls">
+            <LanguageSelector language={language} onChange={setLanguage} />
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          </div>
         </div>
       </header>
 
@@ -105,23 +206,76 @@ function App() {
         {error && (
           <div className="error-banner">
             <p>{error}</p>
-            <button className="btn btn-ghost btn-sm" onClick={() => setError(null)}>Dismiss</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setError(null)}>
+              {t('error.dismiss')}
+            </button>
           </div>
         )}
 
         {gameState === 'idle' && (
           <div className="idle-screen">
             <div className="idle-content">
-              <h2 className="idle-title">Last Known Location</h2>
-              <p className="idle-description">
-                A suspect has been spotted. Analyze the scene and mark their last known position on the map.
-              </p>
+              <h2 className="idle-title">{t('idle.title')}</h2>
+              <p className="idle-description">{t('idle.description')}</p>
+
+              <div className="difficulty-selector">
+                <span className="difficulty-label">{t('idle.difficulty')}</span>
+                <div className="difficulty-options">
+                  {DIFFICULTIES.map((d) => (
+                    <button
+                      key={d}
+                      className={`btn btn-sm ${d === difficulty ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => setDifficulty(d)}
+                    >
+                      <span>{t(`difficulty.${d}`)}</span>
+                      <span className="difficulty-detail">{t(`difficulty.${d}.detail`)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <button
                 className="btn btn-primary btn-lg"
                 onClick={startGame}
                 disabled={loading}
               >
-                {loading ? 'Opening case...' : 'New Case'}
+                {loading ? t('idle.loading') : t('idle.newCase')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {gameState === 'briefing' && gameData && (
+          <div className="briefing-screen">
+            <div className="briefing-content">
+              <h2 className="briefing-title">{t('briefing.title')}</h2>
+              <p className="briefing-subtitle">{t('briefing.subtitle')}</p>
+
+              <div className="briefing-clue">
+                <span className="clue-tag">{t('clue.intel')}</span>
+                <p className="briefing-clue-text">{gameData.initialClue}</p>
+              </div>
+
+              <div className="briefing-meta">
+                <div className="briefing-meta-item">
+                  <span className="briefing-meta-label">{t('briefing.difficulty')}</span>
+                  <span className="briefing-meta-value">{t(`difficulty.${gameData.difficulty}`)}</span>
+                </div>
+                <div className="briefing-meta-item">
+                  <span className="briefing-meta-label">{t('briefing.timeLimit')}</span>
+                  <span className="briefing-meta-value">{gameData.timeLimit}{t('briefing.seconds')}</span>
+                </div>
+                <div className="briefing-meta-item">
+                  <span className="briefing-meta-label">{t('briefing.energy')}</span>
+                  <span className="briefing-meta-value">{gameData.energy}</span>
+                </div>
+              </div>
+
+              <button
+                className="btn btn-primary btn-lg briefing-start-btn"
+                onClick={startInvestigation}
+              >
+                {t('briefing.start')}
               </button>
             </div>
           </div>
@@ -130,6 +284,21 @@ function App() {
         {gameState === 'playing' && gameData && (
           <div className="game-layout">
             <div className="scene-panel">
+              <div className="scene-hud">
+                <Timer
+                  timeLimit={gameData.timeLimit}
+                  onTimeUp={handleTimeUp}
+                />
+                <ResourceBar
+                  energy={resources.energy}
+                  maxEnergy={gameData.maxEnergy}
+                  movementUnlocked={resources.movementUnlocked}
+                  hasBet={resources.hasBet}
+                  cluesAvailable={resources.cluesAvailable > 0}
+                  onAction={handleAction}
+                  t={t}
+                />
+              </div>
               <SceneViewer
                 provider={gameData.provider}
                 imageId={gameData.imageId}
@@ -138,6 +307,13 @@ function App() {
                 lat={gameData.searchLat}
                 lng={gameData.searchLng}
                 googleApiKey={GOOGLE_API_KEY}
+                interactive={resources.movementUnlocked}
+                t={t}
+              />
+              <CluePanel
+                initialClue={gameData.initialClue}
+                revealedClues={resources.revealedClues}
+                t={t}
               />
             </div>
             <div className="map-panel">
@@ -151,7 +327,7 @@ function App() {
                   onClick={confirmGuess}
                   disabled={!selectedLocation || loading}
                 >
-                  {loading ? 'Submitting...' : 'Confirm Location'}
+                  {loading ? t('game.submitting') : t('game.confirmLocation')}
                 </button>
               </div>
             </div>
@@ -161,17 +337,40 @@ function App() {
         {gameState === 'result' && resultData && (
           <div className="result-screen">
             <div className="result-header">
-              <h2 className="result-title">Case Report</h2>
+              <h2 className="result-title">{t('result.title')}</h2>
               <div className="result-stats">
                 <div className="result-stat">
-                  <span className="result-stat-label">Score</span>
+                  <span className="result-stat-label">{t('result.score')}</span>
                   <span className="result-stat-value">{resultData.score.toLocaleString()}</span>
                   <span className="result-stat-max">/ 5,000</span>
                 </div>
                 <div className="result-stat">
-                  <span className="result-stat-label">Distance</span>
+                  <span className="result-stat-label">{t('result.distance')}</span>
                   <span className="result-stat-value">{resultData.distanceKm.toLocaleString()} km</span>
                 </div>
+              </div>
+
+              <div className="result-breakdown">
+                <div className="breakdown-item">
+                  <span className="breakdown-label">{t('result.baseScore')}</span>
+                  <span className="breakdown-value">{resultData.breakdown.baseScore.toLocaleString()}</span>
+                </div>
+                {resultData.breakdown.cluePenalty > 0 && (
+                  <div className="breakdown-item breakdown-penalty">
+                    <span className="breakdown-label">{t('result.cluePenalty')}</span>
+                    <span className="breakdown-value">-{resultData.breakdown.cluePenalty}%</span>
+                  </div>
+                )}
+                <div className="breakdown-item">
+                  <span className="breakdown-label">{t('result.timeBonus')}</span>
+                  <span className="breakdown-value">+{resultData.breakdown.timeBonus}%</span>
+                </div>
+                {resultData.breakdown.betMultiplier > 1 && (
+                  <div className="breakdown-item breakdown-bet">
+                    <span className="breakdown-label">{t('result.betMultiplier')}</span>
+                    <span className="breakdown-value">x{resultData.breakdown.betMultiplier}</span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="result-map">
@@ -186,7 +385,7 @@ function App() {
             </div>
             <div className="result-actions">
               <button className="btn btn-primary btn-lg" onClick={startGame} disabled={loading}>
-                {loading ? 'Opening case...' : 'New Case'}
+                {loading ? t('idle.loading') : t('result.newCase')}
               </button>
             </div>
           </div>

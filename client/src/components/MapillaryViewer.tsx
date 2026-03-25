@@ -6,9 +6,10 @@ interface MapillaryViewerProps {
   imageId: string
   accessToken: string
   interactive?: boolean  // false = locked (no movement), true = can move
+  t: (key: string) => string
 }
 
-export function MapillaryViewer({ imageId, accessToken, interactive = false }: MapillaryViewerProps) {
+export function MapillaryViewer({ imageId, accessToken, interactive = false, t }: MapillaryViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerRef = useRef<Viewer | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -24,7 +25,7 @@ export function MapillaryViewer({ imageId, accessToken, interactive = false }: M
       imageId,
       component: {
         cover: false,
-        direction: !interactive,  // hide direction arrows if not interactive
+        direction: interactive,  // show direction arrows only if interactive
         sequence: false,          // hide sequence navigation
         zoom: true,
       },
@@ -46,8 +47,8 @@ export function MapillaryViewer({ imageId, accessToken, interactive = false }: M
   if (!imageId || imageId === 'placeholder') {
     return (
       <div className="scene-viewer scene-viewer-placeholder">
-        <p>No street-level imagery available</p>
-        <p className="scene-viewer-hint">Set MAPILLARY_TOKEN in server .env</p>
+        <p>{t('scene.noImagery')}</p>
+        <p className="scene-viewer-hint">{t('scene.hintToken')}</p>
       </div>
     )
   }
@@ -57,7 +58,7 @@ export function MapillaryViewer({ imageId, accessToken, interactive = false }: M
       {isLoading && (
         <div className="scene-viewer-loading">
           <div className="loading-spinner" />
-          <p>Loading scene...</p>
+          <p>{t('scene.loading')}</p>
         </div>
       )}
       <div ref={containerRef} className="scene-viewer-container" />
