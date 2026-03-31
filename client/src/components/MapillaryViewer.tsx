@@ -14,6 +14,7 @@ export function MapillaryViewer({ imageId, accessToken, interactive = false, t }
   const viewerRef = useRef<Viewer | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  // Create viewer once
   useEffect(() => {
     if (!containerRef.current || !imageId || imageId === 'placeholder') return
 
@@ -25,16 +26,16 @@ export function MapillaryViewer({ imageId, accessToken, interactive = false, t }
       imageId,
       component: {
         cover: false,
-        direction: interactive,  // show direction arrows only if interactive
-        sequence: false,          // hide sequence navigation
+        direction: interactive,
+        sequence: false,
         zoom: true,
       },
     })
 
     viewer.on('image', () => {
       setIsLoading(false)
-      // Zoom out to widest view (0 = min zoom, 3 = max zoom)
       viewer.setZoom(0)
+      viewer.resize()
     })
 
     viewerRef.current = viewer
@@ -43,9 +44,41 @@ export function MapillaryViewer({ imageId, accessToken, interactive = false, t }
       viewer.remove()
       viewerRef.current = null
     }
-  }, [imageId, accessToken, interactive])
+    // Only create/destroy on mount/unmount or when token/interactive changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, interactive])
 
-  // Show placeholder if no image
+  // Navigate to new image without destroying the viewer
+  useEffect(() => {
+    const viewer = viewerRef.current
+    if (!viewer || !imageId || imageId === 'placeholder') return
+
+    setIsLoading(true)
+    viewer.moveTo(imageId).then(() => {
+      setIsLoading(false)
+      viewer.setZoom(0)
+      viewer.resize()
+    }).catch(() => {
+      setIsLoading(false)
+    })
+  }, [imageId])
+
+  // Resize viewer when container size changes
+  useEffect(() => {
+    const viewer = viewerRef.current
+    if (!viewer) return
+
+    const ro = new ResizeObserver(() => {
+      viewer.resize()
+    })
+
+    if (containerRef.current) {
+      ro.observe(containerRef.current)
+    }
+
+    return () => ro.disconnect()
+  }, [])
+
   if (!imageId || imageId === 'placeholder') {
     return (
       <div className="scene-viewer scene-viewer-placeholder">

@@ -77,11 +77,29 @@ export default function ReviewApp() {
     setNote(selected?.review?.note || '')
   }, [selected?.imageId])
 
+  // Update stats locally instead of fetching after every vote
+  const updateStatsLocal = useCallback((vote: ReviewVote, prevVote?: ReviewVote) => {
+    setStats((prev) => {
+      if (!prev) return prev
+      const s = { ...prev, countries: prev.countries.map((c) => ({ ...c })) }
+      if (!prevVote) {
+        s.reviewed++
+      } else {
+        if (prevVote === 'approve') s.approved--
+        else s.rejected--
+      }
+      if (vote === 'approve') s.approved++
+      else s.rejected++
+      return s
+    })
+  }, [])
+
   const handleVote = useCallback(async (vote: ReviewVote) => {
     const cur = selectedRef.current
     if (!cur || votingRef.current) return
     setVoting(true)
     try {
+      const prevVote = cur.review?.vote
       await api.submitReview(cur.imageId, vote, noteRef.current || undefined)
       setLocations((prev) =>
         prev.map((l) =>
@@ -90,14 +108,14 @@ export default function ReviewApp() {
             : l
         )
       )
-      loadStats()
+      updateStatsLocal(vote, prevVote)
       // Auto-advance to next
       setSelectedIdx((i) => (i < locationsLenRef.current - 1 ? i + 1 : i))
     } catch (e) {
       console.error('Failed to submit review', e)
     }
     setVoting(false)
-  }, [loadStats])
+  }, [updateStatsLocal])
 
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
 
@@ -183,7 +201,6 @@ export default function ReviewApp() {
             <div className="review-loading">{t('review.loading')}</div>
           ) : selected ? (
             <MapillaryViewer
-              key={selected.imageId}
               imageId={selected.imageId}
               accessToken={MAPILLARY_TOKEN}
               interactive={true}
