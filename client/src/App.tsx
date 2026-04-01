@@ -332,8 +332,75 @@ function App() {
           </div>
         )}
 
+        {/* Game layout renders during briefing (hidden) to preload the scene */}
+        {(gameState === 'briefing' || gameState === 'playing') && gameData && (
+          <div className="game-layout">
+            <div className="scene-panel">
+              {gameState === 'playing' && (
+                <div className="scene-hud">
+                  <div className="round-indicator">
+                    {t('game.round')} {currentRound + 1}/{TOTAL_ROUNDS}
+                  </div>
+                  <Timer
+                    key={currentRound}
+                    timeLimit={gameData.timeLimit}
+                    onTimeUp={handleTimeUp}
+                    onUrgentTick={handleTimerTick}
+                  />
+                  <ResourceBar
+                    energy={resources.energy}
+                    maxEnergy={maxEnergy}
+                    movementUnlocked={resources.movementUnlocked}
+                    hasBet={resources.hasBet}
+                    cluesAvailable={resources.cluesAvailable > 0}
+                    onAction={handleAction}
+                    t={t}
+                  />
+                </div>
+              )}
+              <SceneViewer
+                provider={gameData.provider}
+                imageId={gameData.imageId}
+                mapillaryToken={MAPILLARY_TOKEN}
+                gameId={gameData.gameId}
+                lat={gameData.searchLat}
+                lng={gameData.searchLng}
+                googleApiKey={GOOGLE_API_KEY}
+                interactive={resources.movementUnlocked}
+                t={t}
+              />
+              {gameState === 'playing' && (
+                <CluePanel
+                  initialClue={gameData.initialClue}
+                  revealedClues={resources.revealedClues}
+                  t={t}
+                />
+              )}
+            </div>
+            {gameState === 'playing' && (
+              <div className="map-panel">
+                <GameMap
+                  key={`map-${currentRound}`}
+                  onLocationSelect={handleLocationSelect}
+                  theme={theme}
+                />
+                <div className="map-actions">
+                  <button
+                    className="btn btn-primary"
+                    onClick={confirmGuess}
+                    disabled={!selectedLocation || loading}
+                  >
+                    {loading ? t('game.submitting') : t('game.confirmLocation')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Briefing overlay — scene loads behind it */}
         {gameState === 'briefing' && gameData && (
-          <div className="briefing-screen">
+          <div className="briefing-overlay">
             <div className="briefing-content">
               <p className="briefing-case-label">{t('session.case')} #{caseNumber}</p>
               <h2 className="briefing-title">{caseName}</h2>
@@ -365,65 +432,6 @@ function App() {
               >
                 {t('briefing.start')}
               </button>
-            </div>
-          </div>
-        )}
-
-        {gameState === 'playing' && gameData && (
-          <div className="game-layout">
-            <div className="scene-panel">
-              <div className="scene-hud">
-                <div className="round-indicator">
-                  {t('game.round')} {currentRound + 1}/{TOTAL_ROUNDS}
-                </div>
-                <Timer
-                  key={currentRound}
-                  timeLimit={gameData.timeLimit}
-                  onTimeUp={handleTimeUp}
-                  onUrgentTick={handleTimerTick}
-                />
-                <ResourceBar
-                  energy={resources.energy}
-                  maxEnergy={maxEnergy}
-                  movementUnlocked={resources.movementUnlocked}
-                  hasBet={resources.hasBet}
-                  cluesAvailable={resources.cluesAvailable > 0}
-                  onAction={handleAction}
-                  t={t}
-                />
-              </div>
-              <SceneViewer
-                provider={gameData.provider}
-                imageId={gameData.imageId}
-                mapillaryToken={MAPILLARY_TOKEN}
-                gameId={gameData.gameId}
-                lat={gameData.searchLat}
-                lng={gameData.searchLng}
-                googleApiKey={GOOGLE_API_KEY}
-                interactive={resources.movementUnlocked}
-                t={t}
-              />
-              <CluePanel
-                initialClue={gameData.initialClue}
-                revealedClues={resources.revealedClues}
-                t={t}
-              />
-            </div>
-            <div className="map-panel">
-              <GameMap
-                key={`map-${currentRound}`}
-                onLocationSelect={handleLocationSelect}
-                theme={theme}
-              />
-              <div className="map-actions">
-                <button
-                  className="btn btn-primary"
-                  onClick={confirmGuess}
-                  disabled={!selectedLocation || loading}
-                >
-                  {loading ? t('game.submitting') : t('game.confirmLocation')}
-                </button>
-              </div>
             </div>
           </div>
         )}

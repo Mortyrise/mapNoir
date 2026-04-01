@@ -11,6 +11,7 @@
   border-radius: var(--radius-md);
   max-height: 200px;
   overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
 .clue-entry {
@@ -19,7 +20,29 @@
   gap: var(--space-2);
   padding: var(--space-2);
   border-radius: var(--radius-sm);
+  transition: opacity var(--transition-normal), background-color var(--transition-normal);
+}
+
+/* Latest clue — full visual weight */
+.clue-latest {
+  background-color: var(--color-accent-muted);
+  border: 1px solid var(--color-border-accent);
   animation: clue-appear 0.3s ease-out;
+}
+
+.clue-latest .clue-text {
+  color: var(--color-text-primary);
+}
+
+/* Older clues — dimmed */
+.clue-older {
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid transparent;
+  opacity: 0.55;
+}
+
+.clue-older .clue-text {
+  color: var(--color-text-tertiary);
 }
 
 @keyframes clue-appear {
@@ -31,16 +54,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.clue-initial {
-  background-color: var(--color-accent-muted);
-  border: 1px solid var(--color-border-accent);
-}
-
-.clue-purchased {
-  background-color: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border);
 }
 
 .clue-tag {
@@ -67,8 +80,4 @@
   font-style: italic;
   color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
-}
-
-.clue-initial .clue-text {
-  color: var(--color-text-primary);
 }

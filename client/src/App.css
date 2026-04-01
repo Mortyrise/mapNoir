@@ -150,11 +150,15 @@
    BRIEFING SCREEN
    Case dossier before timer starts
    ------------------------- */
-.briefing-screen {
+/* Briefing overlay — sits on top of the game layout while scene preloads behind */
+.briefing-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dropdown);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 200px);
+  background-color: var(--color-bg-primary);
 }
 
 .briefing-content {
