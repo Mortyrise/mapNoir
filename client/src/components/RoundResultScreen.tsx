@@ -1,4 +1,5 @@
 import { GameMap } from './GameMap'
+import { useCountUp } from '../hooks/useCountUp'
 import type { LatLng } from '../types'
 import './RoundResultScreen.css'
 
@@ -31,6 +32,8 @@ export function RoundResultScreen({
   t,
   loading,
 }: RoundResultScreenProps) {
+  const animatedScore = useCountUp(score)
+
   return (
     <div className="round-result-screen">
       <div className="round-result-header">
@@ -40,7 +43,7 @@ export function RoundResultScreen({
         <div className="round-result-stats">
           <div className="round-result-stat">
             <span className="round-result-stat-label">{t('result.score')}</span>
-            <span className="round-result-stat-value">{score.toLocaleString()}</span>
+            <span className="round-result-stat-value">{animatedScore.toLocaleString()}</span>
           </div>
           <div className="round-result-stat">
             <span className="round-result-stat-label">{t('result.distance')}</span>

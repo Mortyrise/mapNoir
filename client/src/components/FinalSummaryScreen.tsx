@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { GameMap } from './GameMap'
+import { useCountUp } from '../hooks/useCountUp'
 import type { Difficulty, RoundSummaryEntry } from '../types'
 import './FinalSummaryScreen.css'
 
@@ -27,6 +28,12 @@ function distanceClass(km: number): string {
   return 'round-bad'
 }
 
+function conclusionTier(totalScore: number): 'good' | 'mid' | 'bad' {
+  if (totalScore >= 15000) return 'good'
+  if (totalScore >= 8000) return 'mid'
+  return 'bad'
+}
+
 export function FinalSummaryScreen({
   caseNumber,
   difficulty,
@@ -39,6 +46,8 @@ export function FinalSummaryScreen({
   loading,
 }: FinalSummaryScreenProps) {
   const [copied, setCopied] = useState(false)
+  const animatedTotal = useCountUp(totalScore, 1500)
+  const tier = conclusionTier(totalScore)
 
   const handleCopy = async () => {
     try {
@@ -72,9 +81,13 @@ export function FinalSummaryScreen({
         </p>
 
         <div className="final-summary-total">
-          <span className="final-summary-total-value">{totalScore.toLocaleString()}</span>
+          <span className="final-summary-total-value">{animatedTotal.toLocaleString()}</span>
           <span className="final-summary-total-label">{t('summary.totalScore')}</span>
         </div>
+
+        <p className={`final-summary-conclusion conclusion-${tier}`}>
+          {t(`summary.conclusion.${tier}`)}
+        </p>
 
         <div className="round-dots">
           {rounds.map((round) => (
@@ -87,45 +100,49 @@ export function FinalSummaryScreen({
         </div>
       </div>
 
-      <div className="final-summary-map">
-        <GameMap
-          theme={theme}
-          disabled
-          multiResultMarkers={multiResultMarkers}
-        />
-      </div>
+      <div className="final-summary-body">
+        <div className="final-summary-map">
+          <GameMap
+            theme={theme}
+            disabled
+            multiResultMarkers={multiResultMarkers}
+          />
+        </div>
 
-      <div className="final-summary-table">
-        {rounds.map((round) => (
-          <div
-            key={round.roundIndex}
-            className={`summary-table-row ${distanceClass(round.distanceKm)}`}
-          >
-            <span className="summary-table-round">{round.roundIndex + 1}</span>
-            <span
-              className="summary-table-indicator"
-              style={{ backgroundColor: distanceColor(round.distanceKm) }}
-            />
-            <span className="summary-table-distance">{round.distanceKm.toLocaleString()} km</span>
-            <span className="summary-table-score">{round.score.toLocaleString()}</span>
+        <div className="final-summary-sidebar">
+          <div className="final-summary-table">
+            {rounds.map((round) => (
+              <div
+                key={round.roundIndex}
+                className={`summary-table-row ${distanceClass(round.distanceKm)}`}
+              >
+                <span className="summary-table-round">{round.roundIndex + 1}</span>
+                <span
+                  className="summary-table-indicator"
+                  style={{ backgroundColor: distanceColor(round.distanceKm) }}
+                />
+                <span className="summary-table-distance">{round.distanceKm.toLocaleString()} km</span>
+                <span className="summary-table-score">{round.score.toLocaleString()}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="final-summary-share">
-        <pre className="share-text">{shareableText}</pre>
-        <button
-          className={`btn btn-sm ${copied ? 'btn-primary' : 'btn-ghost'}`}
-          onClick={handleCopy}
-        >
-          {copied ? t('summary.copied') : t('summary.share')}
-        </button>
-      </div>
+          <div className="final-summary-share">
+            <pre className="share-text">{shareableText}</pre>
+            <button
+              className={`btn btn-sm ${copied ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={handleCopy}
+            >
+              {copied ? t('summary.copied') : t('summary.share')}
+            </button>
+          </div>
 
-      <div className="final-summary-actions">
-        <button className="btn btn-primary btn-lg" onClick={onPlayAgain} disabled={loading}>
-          {loading ? '...' : t('summary.playAgain')}
-        </button>
+          <div className="final-summary-actions">
+            <button className="btn btn-primary btn-lg" onClick={onPlayAgain} disabled={loading}>
+              {loading ? '...' : t('summary.playAgain')}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

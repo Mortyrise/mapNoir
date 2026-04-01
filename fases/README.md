@@ -31,10 +31,10 @@ Loop completo jugable: ver escena Mapillary → briefing → marcar en mapa → 
 ### [Fase 2 — Pistas y Recursos](./fase-2-pistas-recursos.md) ✅
 1000 pistas por idioma (40 países × 5 categorías × 5), voz narrativa del informante, priorizando lo no-visual (olores, sonidos, comportamientos). Energía, timer, apuesta, movimiento. Desglose de score con deltas de puntos.
 
-### [Fase 3 — Partida Completa y Game Feel](./fase-3-partida-completa.md) ⬜ Siguiente
-Sesión de 5 rondas, narrativa detective, resumen final, texto compartible, pre-generación batch.
+### [Fase 3 — Partida Completa y Game Feel](./fase-3-partida-completa.md) ✅
+Sesión de 5 rondas con energía compartida, narrativa detective (3 variantes + conclusión por rendimiento), resumen final con mapa y texto compartible, selector de dificultad, efectos de sonido, animaciones (pin drop, score roll-up), responsive, pool de ~2150 ubicaciones pre-validadas, sistema de review.
 
-### [Fase 4 — Auth y Persistencia](./fase-4-auth-persistencia.md)
+### [Fase 4 — Auth y Persistencia](./fase-4-auth-persistencia.md) ⬜ Siguiente
 Swap JSON → SQLite, Google OAuth, historial de partidas, ranking global. Punto de inflexión.
 
 ### [Fase 5 — Duelos Async y Reto Diario](./fase-5-duelos-async.md)

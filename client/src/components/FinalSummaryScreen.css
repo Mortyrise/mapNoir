@@ -5,19 +5,22 @@
 
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
-  max-width: 900px;
+  gap: var(--space-10);
+  max-width: 1100px;
   margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-12);
 }
 
-/* Header: title + case + total + dots */
+/* =========================================
+   HEADER — title, case info, score, dots
+   ========================================= */
 .final-summary-header {
   text-align: center;
-  padding: var(--space-4) 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
+  animation: summary-reveal 0.5s ease-out both;
 }
 
 .final-summary-title {
@@ -25,117 +28,177 @@
   font-size: var(--text-3xl);
   color: var(--color-accent-primary);
   margin: 0;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .final-summary-case {
-  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
   color: var(--color-text-tertiary);
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.12em;
+  padding: var(--space-1) var(--space-4);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
 }
 
 .final-summary-total {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-4) var(--space-8);
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-12);
+  margin: var(--space-2) 0;
   background-color: var(--color-bg-secondary);
   border: 1px solid var(--color-border-accent);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glow);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    var(--shadow-glow),
+    0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .final-summary-total-value {
   font-family: var(--font-heading);
-  font-size: var(--text-4xl);
+  font-size: 3rem;
   color: var(--color-accent-primary);
   font-weight: 700;
-  line-height: var(--leading-tight);
+  line-height: 1;
+  letter-spacing: 0.02em;
 }
 
 .final-summary-total-label {
+  font-family: var(--font-mono);
   font-size: var(--text-xs);
   color: var(--color-text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   font-weight: 500;
+}
+
+/* Conclusion text */
+.final-summary-conclusion {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-style: italic;
+  margin: 0;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  animation: conclusion-fade 0.6s ease-out 1.4s forwards;
+}
+
+.conclusion-good { color: var(--color-round-good); }
+.conclusion-mid { color: var(--color-round-mid); }
+.conclusion-bad { color: var(--color-round-bad); }
+
+@keyframes conclusion-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Round performance dots */
 .round-dots {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
 }
 
 .round-dot {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   cursor: help;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .round-dot:hover {
-  transform: scale(1.3);
+  transform: scale(1.4);
 }
 
 .round-dot.round-good {
   background-color: var(--color-round-good);
-  box-shadow: 0 0 6px var(--color-round-good);
+  box-shadow: 0 0 8px var(--color-round-good);
 }
 
 .round-dot.round-mid {
   background-color: var(--color-round-mid);
-  box-shadow: 0 0 6px var(--color-round-mid);
+  box-shadow: 0 0 8px var(--color-round-mid);
 }
 
 .round-dot.round-bad {
   background-color: var(--color-round-bad);
-  box-shadow: 0 0 6px var(--color-round-bad);
+  box-shadow: 0 0 8px var(--color-round-bad);
+}
+
+/* =========================================
+   BODY — map + sidebar, 2 cols on desktop
+   ========================================= */
+.final-summary-body {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: var(--space-8);
+  align-items: start;
+  animation: summary-reveal 0.5s ease-out 0.15s both;
 }
 
 /* Map */
 .final-summary-map {
-  min-height: 350px;
   border-radius: var(--radius-lg);
   overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
 }
 
 .final-summary-map .game-map-container {
-  height: 350px;
+  height: 450px;
 }
 
-/* Score table */
+/* Sidebar */
+.final-summary-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* =========================================
+   SCORE TABLE
+   ========================================= */
 .final-summary-table {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-3);
+  animation: summary-reveal 0.4s ease-out 0.25s both;
 }
 
 .summary-table-row {
   display: grid;
-  grid-template-columns: 40px 8px 1fr auto;
+  grid-template-columns: 36px 10px 1fr auto;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-4);
-  background-color: var(--color-bg-tertiary);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-bg-secondary);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   align-items: center;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.summary-table-row:hover {
+  border-color: var(--color-border-hover);
+  transform: translateX(2px);
 }
 
 .summary-table-round {
   font-family: var(--font-mono);
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   text-align: center;
 }
 
 .summary-table-indicator {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -148,30 +211,30 @@
 
 .summary-table-score {
   font-family: var(--font-mono);
+  font-size: var(--text-base);
   font-weight: 600;
   color: var(--color-text-primary);
   text-align: right;
 }
 
 /* Color the score based on round performance */
-.summary-table-row.round-good .summary-table-score {
-  color: var(--color-round-good);
-}
+.summary-table-row.round-good .summary-table-score { color: var(--color-round-good); }
+.summary-table-row.round-mid .summary-table-score { color: var(--color-round-mid); }
+.summary-table-row.round-bad .summary-table-score { color: var(--color-round-bad); }
 
-.summary-table-row.round-mid .summary-table-score {
-  color: var(--color-round-mid);
-}
-
-.summary-table-row.round-bad .summary-table-score {
-  color: var(--color-round-bad);
-}
-
-/* Share box */
+/* =========================================
+   SHARE BOX
+   ========================================= */
 .final-summary-share {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  animation: summary-reveal 0.4s ease-out 0.35s both;
 }
 
 .share-text {
@@ -181,17 +244,90 @@
   background-color: var(--color-bg-tertiary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-6);
   margin: 0;
   white-space: pre;
   overflow-x: auto;
   max-width: 100%;
-  line-height: 1.5;
+  line-height: 1.6;
   text-align: center;
 }
 
+/* =========================================
+   ACTIONS
+   ========================================= */
 .final-summary-actions {
   display: flex;
   justify-content: center;
-  padding: var(--space-2) 0 var(--space-4);
+  padding-top: var(--space-2);
+  animation: summary-reveal 0.4s ease-out 0.45s both;
+}
+
+/* =========================================
+   STAGGER ANIMATION
+   ========================================= */
+@keyframes summary-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+@media (max-width: 1024px) {
+  .final-summary-screen {
+    gap: var(--space-8);
+    padding: var(--space-6) var(--space-4) var(--space-10);
+  }
+
+  .final-summary-body {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .final-summary-map .game-map-container {
+    height: 320px;
+  }
+
+  .final-summary-total {
+    padding: var(--space-5) var(--space-8);
+  }
+
+  .final-summary-total-value {
+    font-size: var(--text-4xl);
+  }
+}
+
+@media (max-width: 640px) {
+  .final-summary-screen {
+    gap: var(--space-6);
+    padding: var(--space-4) var(--space-3) var(--space-8);
+  }
+
+  .final-summary-map .game-map-container {
+    height: 250px;
+  }
+
+  .final-summary-total {
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .final-summary-total-value {
+    font-size: var(--text-3xl);
+  }
+
+  .final-summary-share {
+    padding: var(--space-4);
+  }
+
+  .share-text {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-xs);
+  }
 }
