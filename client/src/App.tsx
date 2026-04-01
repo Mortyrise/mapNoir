@@ -77,6 +77,7 @@ function App() {
   // Session state
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [caseNumber, setCaseNumber] = useState<number>(0)
+  const [caseName, setCaseName] = useState<string>('')
   const [currentRound, setCurrentRound] = useState<number>(0)
   const [maxEnergy, setMaxEnergy] = useState<number>(7)
   const [briefResult, setBriefResult] = useState<BriefRoundResult | null>(null)
@@ -135,6 +136,7 @@ function App() {
       const data = await api.newSession(difficulty, language)
       setSessionId(data.sessionId)
       setCaseNumber(data.caseNumber)
+      setCaseName(data.caseName)
       setCurrentRound(data.currentRound)
       setBriefResult(null)
       setSessionSummary(null)
@@ -142,7 +144,8 @@ function App() {
       setMaxEnergy(data.maxEnergy)
 
       // Pick a random briefing intro
-      const introIndex = Math.floor(Math.random() * 3) + 1
+      const introCount = parseInt(t('briefing.caseIntro.count'), 10) || 10
+      const introIndex = Math.floor(Math.random() * introCount) + 1
       setCaseIntro(t(`briefing.caseIntro.${introIndex}`))
 
       setupRound(data.game, data.energy)
@@ -332,9 +335,8 @@ function App() {
         {gameState === 'briefing' && gameData && (
           <div className="briefing-screen">
             <div className="briefing-content">
-              <h2 className="briefing-title">
-                {t('session.case')} #{caseNumber}
-              </h2>
+              <p className="briefing-case-label">{t('session.case')} #{caseNumber}</p>
+              <h2 className="briefing-title">{caseName}</h2>
               <p className="briefing-subtitle">{caseIntro}</p>
 
               <div className="briefing-clue">
@@ -435,6 +437,7 @@ function App() {
             guessLocation={briefResult.guessLocation}
             actualLocation={briefResult.actualLocation}
             isLastRound={briefResult.isLastRound}
+            caseName={caseName}
             onNextRound={handleNextRound}
             onViewSummary={handleViewSummary}
             theme={theme}
@@ -446,6 +449,7 @@ function App() {
         {gameState === 'finalSummary' && sessionSummary && (
           <FinalSummaryScreen
             caseNumber={sessionSummary.caseNumber}
+            caseName={sessionSummary.caseName}
             difficulty={sessionSummary.difficulty}
             rounds={sessionSummary.rounds}
             totalScore={sessionSummary.totalScore}

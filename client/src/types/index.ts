@@ -76,6 +76,7 @@ export interface GuessResult {
 export interface SessionResponse {
   sessionId: string
   caseNumber: number
+  caseName: string
   difficulty: Difficulty
   totalRounds: number
   currentRound: number
@@ -108,6 +109,7 @@ export interface BriefRoundResult {
 
 export interface SessionSummary {
   caseNumber: number
+  caseName: string
   difficulty: Difficulty
   rounds: RoundSummaryEntry[]
   totalScore: number

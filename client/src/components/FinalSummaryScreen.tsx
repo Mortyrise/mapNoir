@@ -6,6 +6,7 @@ import './FinalSummaryScreen.css'
 
 interface FinalSummaryScreenProps {
   caseNumber: number
+  caseName: string
   difficulty: Difficulty
   rounds: RoundSummaryEntry[]
   totalScore: number
@@ -34,8 +35,13 @@ function conclusionTier(totalScore: number): 'good' | 'mid' | 'bad' {
   return 'bad'
 }
 
+function interpolate(template: string, vars: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) => String(vars[key] ?? ''))
+}
+
 export function FinalSummaryScreen({
   caseNumber,
+  caseName,
   difficulty,
   rounds,
   totalScore,
@@ -48,6 +54,10 @@ export function FinalSummaryScreen({
   const [copied, setCopied] = useState(false)
   const animatedTotal = useCountUp(totalScore, 1500)
   const tier = conclusionTier(totalScore)
+
+  // Best and worst rounds
+  const bestRound = rounds.reduce((a, b) => (a.distanceKm <= b.distanceKm ? a : b))
+  const worstRound = rounds.reduce((a, b) => (a.distanceKm >= b.distanceKm ? a : b))
 
   const handleCopy = async () => {
     try {
@@ -75,19 +85,26 @@ export function FinalSummaryScreen({
   return (
     <div className="final-summary-screen">
       <div className="final-summary-header">
-        <h2 className="final-summary-title">{t('summary.title')}</h2>
-        <p className="final-summary-case">
+        <p className="final-summary-case-label">
           {t('session.case')} #{caseNumber} — {t(`difficulty.${difficulty}`)}
         </p>
+        <h2 className="final-summary-title">{caseName}</h2>
 
         <div className="final-summary-total">
           <span className="final-summary-total-value">{animatedTotal.toLocaleString()}</span>
           <span className="final-summary-total-label">{t('summary.totalScore')}</span>
         </div>
 
-        <p className={`final-summary-conclusion conclusion-${tier}`}>
-          {t(`summary.conclusion.${tier}`)}
-        </p>
+        <div className="final-summary-debrief">
+          <p className={`final-summary-conclusion conclusion-${tier}`}>
+            {t(`summary.conclusion.${tier}`)}
+          </p>
+          <p className="final-summary-recap">
+            {interpolate(t('summary.bestRound'), { round: bestRound.roundIndex + 1, distance: bestRound.distanceKm.toLocaleString() })}
+            {' '}
+            {interpolate(t('summary.worstRound'), { round: worstRound.roundIndex + 1, distance: worstRound.distanceKm.toLocaleString() })}
+          </p>
+        </div>
 
         <div className="round-dots">
           {rounds.map((round) => (

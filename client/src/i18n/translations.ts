@@ -81,10 +81,32 @@ export const translations: Record<Language, Record<string, string>> = {
     'game.round': 'Round',
     'session.case': 'Case',
 
-    // Briefing narrative intros (3 variants, randomly selected)
+    // Briefing narrative intros (10 variants, randomly selected)
     'briefing.caseIntro.1': 'An anonymous tip came in at 0300 hours. A suspect has been spotted at an unknown location. Study the scene and determine the coordinates.',
     'briefing.caseIntro.2': 'Intelligence intercepted a coded transmission. We traced it to a street-level camera feed. Identify the suspect\'s position.',
     'briefing.caseIntro.3': 'A field agent went dark after sending partial coordinates. Reconstruct their route from the available evidence.',
+    'briefing.caseIntro.4': 'A diplomatic pouch was intercepted at a border crossing. The contents lead here. Confirm the location.',
+    'briefing.caseIntro.5': 'Satellite imagery flagged unusual activity. Ground-level confirmation needed. Trust the clues, not the scenery.',
+    'briefing.caseIntro.6': 'An asset embedded in a smuggling ring sent these coordinates before going silent. Verify the drop point.',
+    'briefing.caseIntro.7': 'Surveillance footage was recovered from a damaged hard drive. The timestamp is gone, but the location may still be identifiable.',
+    'briefing.caseIntro.8': 'A coded message was found in an abandoned safehouse. It references this camera feed. Determine where it was taken.',
+    'briefing.caseIntro.9': 'A defector claims to have passed through this area. Cross-reference the scene with available intelligence.',
+    'briefing.caseIntro.10': 'An intercepted phone call mentioned this location. The line went dead seconds later. Pinpoint the coordinates.',
+    'briefing.caseIntro.count': '10',
+
+    // Round transition — handler voice (escalating tension)
+    'round.transition.1': 'First signal intercepted. Proceeding to the next lead.',
+    'round.transition.2': 'The suspect moved. Tracking second position.',
+    'round.transition.3': 'Halfway through the case. Stay sharp, detective.',
+    'round.transition.4': 'We\'re closing in. One more signal after this.',
+    'round.transition.5': 'Last known position. Make it count.',
+
+    // Handler performance comments (shown after each round)
+    'handler.accuracy.excellent': 'Impressive precision. The suspect can\'t hide for long.',
+    'handler.accuracy.good': 'Solid lead. We\'re on the right track.',
+    'handler.accuracy.decent': 'In the vicinity. Could be tighter.',
+    'handler.accuracy.poor': 'Loose lead. We need to sharpen up.',
+    'handler.accuracy.cold': 'Way off. The trail went cold on this one.',
 
     // Round Result (brief, between rounds)
     'roundResult.title': 'Round Complete',
@@ -97,9 +119,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'summary.distance': 'Distance',
     'summary.score': 'Score',
     'summary.totalScore': 'Total Score',
-    'summary.conclusion.good': 'Excellent work, detective. The case is closed.',
-    'summary.conclusion.mid': 'Decent fieldwork. The suspect slipped, but we have leads.',
-    'summary.conclusion.bad': 'The case goes cold. Better luck next time, detective.',
+    'summary.conclusion.good': 'Excellent work, detective. The case is closed. I\'ll file this one as a success.',
+    'summary.conclusion.mid': 'Decent fieldwork. The suspect slipped, but we have enough to keep the file open.',
+    'summary.conclusion.bad': 'The case goes cold. We\'ll need better intel next time, detective.',
+    'summary.bestRound': 'Best lead: Round {round} — {distance}km off.',
+    'summary.worstRound': 'Weakest signal: Round {round} — {distance}km off.',
     'summary.share': 'Share Result',
     'summary.copied': 'Copied!',
     'summary.playAgain': 'New Case',
@@ -212,10 +236,32 @@ export const translations: Record<Language, Record<string, string>> = {
     'game.round': 'Ronda',
     'session.case': 'Caso',
 
-    // Briefing narrative intros
+    // Briefing narrative intros (10 variants)
     'briefing.caseIntro.1': 'Recibimos un aviso anónimo a las 0300. Un sospechoso ha sido avistado en una ubicación desconocida. Estudia la escena y determina las coordenadas.',
     'briefing.caseIntro.2': 'Inteligencia interceptó una transmisión cifrada. La rastreamos hasta una cámara a pie de calle. Identifica la posición del sospechoso.',
     'briefing.caseIntro.3': 'Un agente de campo dejó de responder tras enviar coordenadas parciales. Reconstruye su ruta con la evidencia disponible.',
+    'briefing.caseIntro.4': 'Una valija diplomática fue interceptada en un paso fronterizo. El contenido apunta aquí. Confirma la ubicación.',
+    'briefing.caseIntro.5': 'Imágenes satelitales detectaron actividad inusual. Se necesita confirmación a nivel de calle. Confía en las pistas, no en el paisaje.',
+    'briefing.caseIntro.6': 'Un activo infiltrado en una red de contrabando envió estas coordenadas antes de quedarse en silencio. Verifica el punto de entrega.',
+    'briefing.caseIntro.7': 'Material de vigilancia fue recuperado de un disco duro dañado. La marca temporal se perdió, pero la ubicación podría ser identificable.',
+    'briefing.caseIntro.8': 'Un mensaje cifrado fue hallado en una casa franca abandonada. Hace referencia a esta cámara. Determina dónde fue tomada.',
+    'briefing.caseIntro.9': 'Un desertor asegura haber pasado por esta zona. Cruza la escena con la inteligencia disponible.',
+    'briefing.caseIntro.10': 'Una llamada interceptada mencionó esta ubicación. La línea se cortó segundos después. Localiza las coordenadas.',
+    'briefing.caseIntro.count': '10',
+
+    // Round transition — handler voice
+    'round.transition.1': 'Primera señal interceptada. Procediendo a la siguiente pista.',
+    'round.transition.2': 'El sospechoso se movió. Rastreando segunda posición.',
+    'round.transition.3': 'Mitad del caso. Mantén la concentración, detective.',
+    'round.transition.4': 'Nos acercamos. Una señal más después de esta.',
+    'round.transition.5': 'Última posición conocida. Que cuente.',
+
+    // Handler performance comments
+    'handler.accuracy.excellent': 'Precisión impresionante. El sospechoso no podrá esconderse mucho más.',
+    'handler.accuracy.good': 'Pista sólida. Vamos por buen camino.',
+    'handler.accuracy.decent': 'En la zona. Podría ser más preciso.',
+    'handler.accuracy.poor': 'Pista floja. Hay que afinar.',
+    'handler.accuracy.cold': 'Muy lejos. La pista se enfrió en esta.',
 
     // Round Result
     'roundResult.title': 'Ronda Completada',
@@ -228,9 +274,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'summary.distance': 'Distancia',
     'summary.score': 'Puntuación',
     'summary.totalScore': 'Puntuación Total',
-    'summary.conclusion.good': 'Excelente trabajo, detective. El caso queda cerrado.',
-    'summary.conclusion.mid': 'Buen trabajo de campo. El sospechoso escapó, pero tenemos pistas.',
-    'summary.conclusion.bad': 'El caso se enfría. Más suerte la próxima vez, detective.',
+    'summary.conclusion.good': 'Excelente trabajo, detective. El caso queda cerrado. Lo archivo como un éxito.',
+    'summary.conclusion.mid': 'Buen trabajo de campo. El sospechoso escapó, pero tenemos suficiente para mantener el expediente abierto.',
+    'summary.conclusion.bad': 'El caso se enfría. Necesitaremos mejor inteligencia la próxima vez, detective.',
+    'summary.bestRound': 'Mejor pista: Ronda {round} — a {distance}km.',
+    'summary.worstRound': 'Señal más débil: Ronda {round} — a {distance}km.',
     'summary.share': 'Compartir Resultado',
     'summary.copied': '¡Copiado!',
     'summary.playAgain': 'Nuevo Caso',

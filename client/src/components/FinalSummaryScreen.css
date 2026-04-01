@@ -23,16 +23,7 @@
   animation: summary-reveal 0.5s ease-out both;
 }
 
-.final-summary-title {
-  font-family: var(--font-heading);
-  font-size: var(--text-3xl);
-  color: var(--color-accent-primary);
-  margin: 0;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.final-summary-case {
+.final-summary-case-label {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   color: var(--color-text-tertiary);
@@ -42,6 +33,15 @@
   padding: var(--space-1) var(--space-4);
   background-color: var(--color-bg-tertiary);
   border-radius: var(--radius-full);
+}
+
+.final-summary-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  color: var(--color-accent-primary);
+  margin: 0;
+  letter-spacing: 0.03em;
+  font-style: italic;
 }
 
 .final-summary-total {
@@ -77,20 +77,40 @@
   font-weight: 500;
 }
 
-/* Conclusion text */
+/* Debrief block — conclusion + recap */
+.final-summary-debrief {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  border-left: 3px solid var(--color-accent-primary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background-color: var(--color-bg-secondary);
+  text-align: left;
+  max-width: 520px;
+  opacity: 0;
+  animation: conclusion-fade 0.5s ease-out 1.4s forwards;
+}
+
 .final-summary-conclusion {
   font-family: var(--font-heading);
   font-size: var(--text-base);
   font-style: italic;
   margin: 0;
   letter-spacing: 0.02em;
-  opacity: 0;
-  animation: conclusion-fade 0.6s ease-out 1.4s forwards;
 }
 
 .conclusion-good { color: var(--color-round-good); }
 .conclusion-mid { color: var(--color-round-mid); }
 .conclusion-bad { color: var(--color-round-bad); }
+
+.final-summary-recap {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin: 0;
+  line-height: var(--leading-relaxed);
+}
 
 @keyframes conclusion-fade {
   from { opacity: 0; transform: translateY(6px); }

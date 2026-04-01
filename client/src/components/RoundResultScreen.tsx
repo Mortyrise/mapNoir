@@ -11,11 +11,20 @@ interface RoundResultScreenProps {
   guessLocation: LatLng
   actualLocation: LatLng
   isLastRound: boolean
+  caseName: string
   onNextRound: () => void
   onViewSummary: () => void
   theme: 'dark' | 'light'
   t: (key: string) => string
   loading: boolean
+}
+
+function getAccuracyKey(km: number): string {
+  if (km < 50) return 'handler.accuracy.excellent'
+  if (km < 200) return 'handler.accuracy.good'
+  if (km < 500) return 'handler.accuracy.decent'
+  if (km < 1000) return 'handler.accuracy.poor'
+  return 'handler.accuracy.cold'
 }
 
 export function RoundResultScreen({
@@ -26,6 +35,7 @@ export function RoundResultScreen({
   guessLocation,
   actualLocation,
   isLastRound,
+  caseName,
   onNextRound,
   onViewSummary,
   theme,
@@ -33,10 +43,13 @@ export function RoundResultScreen({
   loading,
 }: RoundResultScreenProps) {
   const animatedScore = useCountUp(score)
+  const transition = t(`round.transition.${roundIndex + 1}`)
+  const accuracy = t(getAccuracyKey(distanceKm))
 
   return (
     <div className="round-result-screen">
       <div className="round-result-header">
+        <span className="round-result-case">{caseName}</span>
         <h2 className="round-result-title">
           {t('game.round')} {roundIndex + 1}/{totalRounds}
         </h2>
@@ -50,6 +63,11 @@ export function RoundResultScreen({
             <span className="round-result-stat-value">{distanceKm.toLocaleString()} km</span>
           </div>
         </div>
+      </div>
+
+      <div className="round-result-handler">
+        <p className="handler-line">{transition}</p>
+        <p className="handler-accuracy">{accuracy}</p>
       </div>
 
       <div className="round-result-map">

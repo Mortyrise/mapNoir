@@ -163,18 +163,29 @@
   padding: var(--space-8) var(--space-6);
 }
 
+.briefing-case-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0 0 var(--space-2);
+}
+
 .briefing-title {
   font-family: var(--font-heading);
   font-size: var(--text-3xl);
   color: var(--color-accent-primary);
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-4);
   letter-spacing: 0.03em;
+  font-style: italic;
 }
 
 .briefing-subtitle {
   font-size: var(--text-sm);
   color: var(--color-text-tertiary);
   margin: 0 0 var(--space-8);
+  line-height: var(--leading-relaxed);
 }
 
 .briefing-clue {

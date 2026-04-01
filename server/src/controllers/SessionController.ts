@@ -69,6 +69,7 @@ export class SessionController {
         const summary = this.sessionService.getSummary(sessionId)
         response.sessionSummary = {
           caseNumber: summary.caseNumber,
+          caseName: summary.caseName,
           difficulty: summary.difficulty,
           rounds: summary.rounds.map((r) => ({
             roundIndex: r.roundIndex,

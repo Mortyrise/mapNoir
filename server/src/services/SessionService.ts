@@ -13,9 +13,46 @@ const SESSION_ENERGY: Record<Difficulty, number> = {
   hard: 4,
 }
 
+// Noir/spy case names — no geographic references (would be a clue)
+const CASE_NAMES: Record<string, string[]> = {
+  en: [
+    'The Fading Signal', 'Operation Blind Meridian', 'The Burned Ledger',
+    'The Silent Frequency', 'Operation Paper Ghost', 'The Fractured Cipher',
+    'The Cold Informant', 'Operation Dead Drop', 'The Missing Reel',
+    'The Phantom Protocol', 'Operation Smoke Mirror', 'The Severed Line',
+    'The Double Exposure', 'Operation Iron Compass', 'The Last Negative',
+    'The Erased Tapes', 'Operation Hollow Signal', 'The Broken Relay',
+    'The Invisible Border', 'Operation Glass Key', 'The Sunken Archive',
+    'The Coded Postcard', 'Operation Silent Witness', 'The Lost Frequency',
+    'The Pale Courier', 'Operation Dark Lens', 'The Vanishing Point',
+    'The Intercepted Letter', 'Operation Dust Archive', 'The Static Line',
+    'The Forgotten Dossier', 'Operation Ash Protocol', 'The Muted Transmission',
+    'The Redacted File', 'Operation Blind Corner', 'The Shadow Dispatch',
+    'The Sealed Envelope', 'Operation Cold Needle', 'The Orphan Signal',
+    'The Terminal Briefing',
+  ],
+  es: [
+    'La Señal Perdida', 'Operación Meridiano Ciego', 'El Libro Quemado',
+    'La Frecuencia Silenciosa', 'Operación Fantasma de Papel', 'El Cifrado Roto',
+    'El Informante Frío', 'Operación Punto Muerto', 'El Carrete Perdido',
+    'El Protocolo Fantasma', 'Operación Espejo de Humo', 'La Línea Cortada',
+    'La Doble Exposición', 'Operación Brújula de Hierro', 'El Último Negativo',
+    'Las Cintas Borradas', 'Operación Señal Hueca', 'El Relé Roto',
+    'La Frontera Invisible', 'Operación Llave de Cristal', 'El Archivo Hundido',
+    'La Postal Cifrada', 'Operación Testigo Silencioso', 'La Frecuencia Perdida',
+    'El Correo Pálido', 'Operación Lente Oscura', 'El Punto de Fuga',
+    'La Carta Interceptada', 'Operación Archivo de Ceniza', 'La Línea Estática',
+    'El Dosier Olvidado', 'Operación Protocolo Gris', 'La Transmisión Muda',
+    'El Expediente Censurado', 'Operación Esquina Ciega', 'El Despacho Sombrío',
+    'El Sobre Sellado', 'Operación Aguja Fría', 'La Señal Huérfana',
+    'El Informe Final',
+  ],
+}
+
 interface ActiveSession {
   id: string
   caseNumber: number
+  caseName: string
   difficulty: Difficulty
   language: string
   locations: PoolEntry[] // 5 pre-selected
@@ -63,19 +100,21 @@ export class SessionService {
   }
 
   private generateShareableText(session: ActiveSession): string {
-    const header = `Map Noir \u2014 Case #${session.caseNumber} (${this.formatDifficulty(session.difficulty)})`
+    const squares = session.roundResults.map((r) => this.scoreToSquares(r.score)).join(' ')
+    const total = session.totalScore.toLocaleString('en-US')
 
-    // Build round lines: 3 per first line, 2 per second line
-    const roundParts = session.roundResults.map(
-      (r) => `${this.scoreToSquares(r.score)} ${r.score.toLocaleString('en-US')}`
-    )
+    return [
+      `Map Noir \ud83d\udd0d Case #${session.caseNumber}`,
+      `${session.caseName} \u2014 ${this.formatDifficulty(session.difficulty)}`,
+      squares,
+      `${total} pts`,
+      'mapnoir.com',
+    ].join('\n')
+  }
 
-    const line1 = roundParts.slice(0, 3).join('  ')
-    const line2 = roundParts.slice(3).join('  ')
-
-    const total = `Total: ${session.totalScore.toLocaleString('en-US')}`
-
-    return `${header}\n${line1}\n${line2}\n${total}\nmapnoir.com`
+  private pickCaseName(language: string): string {
+    const names = CASE_NAMES[language] || CASE_NAMES['en']
+    return names[Math.floor(Math.random() * names.length)]
   }
 
   async createSession(
@@ -84,6 +123,7 @@ export class SessionService {
   ): Promise<{
     sessionId: string
     caseNumber: number
+    caseName: string
     difficulty: Difficulty
     totalRounds: number
     currentRound: number
@@ -113,6 +153,7 @@ export class SessionService {
     const session: ActiveSession = {
       id: uuidv4(),
       caseNumber: nextCaseNumber++,
+      caseName: this.pickCaseName(language),
       difficulty,
       language,
       locations,
@@ -132,6 +173,7 @@ export class SessionService {
     return {
       sessionId: session.id,
       caseNumber: session.caseNumber,
+      caseName: session.caseName,
       difficulty: session.difficulty,
       totalRounds: ROUNDS_PER_SESSION,
       currentRound: session.currentRound,
@@ -273,6 +315,7 @@ export class SessionService {
   getSummary(sessionId: string): {
     sessionId: string
     caseNumber: number
+    caseName: string
     difficulty: Difficulty
     totalScore: number
     rounds: SessionRoundResult[]
@@ -291,6 +334,7 @@ export class SessionService {
     return {
       sessionId: session.id,
       caseNumber: session.caseNumber,
+      caseName: session.caseName,
       difficulty: session.difficulty,
       totalScore: session.totalScore,
       rounds: session.roundResults,
