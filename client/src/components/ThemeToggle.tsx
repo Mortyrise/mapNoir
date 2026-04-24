@@ -1,3 +1,4 @@
+import { Icon } from './icons/Icon'
 import type { Theme } from '../hooks/useTheme'
 
 interface ThemeToggleProps {
@@ -7,17 +8,17 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
   const isDark = theme === 'dark'
+  const label = isDark ? 'Switch to paper mode' : 'Switch to noir mode'
 
   return (
     <button
-      className="btn btn-ghost btn-sm theme-toggle"
+      type="button"
+      className="theme-toggle"
       onClick={onToggle}
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
-      title={`Switch to ${isDark ? 'light' : 'dark'} theme`}
+      aria-label={label}
+      title={label}
     >
-      <span className="theme-toggle-icon" aria-hidden="true">
-        {isDark ? '\u2600' : '\u263E'}
-      </span>
+      <Icon name={isDark ? 'sun' : 'moon'} size={16} stroke="currentColor" />
     </button>
   )
 }

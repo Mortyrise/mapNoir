@@ -1,127 +1,154 @@
 /* ============================================
    MAP NOIR — Design Tokens
-   Noir / Detective Theme
+   Default: Teal espía (dark). Override: Light paper.
    ============================================ */
 
 :root {
-  /* === NOIR COLOR PALETTE === */
+  /* === CORE PALETTE (Teal espía, default) === */
+  --bg:        #07090a;                         /* fondo principal */
+  --bg-2:      #0f1416;                         /* superficies elevadas */
+  --accent:    #6ab8a8;                         /* teal — acciones primarias */
+  --accent-2:  #d97706;                         /* naranja quemado — alertas/pins */
+  --fg:        #e8e6e3;                         /* texto principal */
+  --fg-muted:  rgba(232, 230, 227, 0.5);        /* texto secundario */
+  --border:    rgba(255, 255, 255, 0.08);       /* divisiones finas */
+  --border-accent: rgba(106, 184, 168, 0.35);   /* divisiones acento */
+  --accent-soft: rgba(106, 184, 168, 0.15);     /* tintes accent sutiles */
+  --grain-opacity: 0.115;
+  --grain-mode: overlay;                        /* mix-blend-mode del grano */
 
-  /* Background layers (darkest to lightest) */
-  --color-bg-primary: #0a0a0f;       /* Deep noir black */
-  --color-bg-secondary: #12121a;     /* Card/panel backgrounds */
-  --color-bg-tertiary: #1a1a26;      /* Elevated surfaces */
-  --color-bg-hover: #22222e;         /* Hover states */
+  /* Legacy aliases — conservan el shape anterior para no romper CSS existente */
+  --color-bg-primary:    var(--bg);
+  --color-bg-secondary:  var(--bg-2);
+  --color-bg-tertiary:   #161c1f;
+  --color-bg-hover:      #1e262a;
+  --color-text-primary:  var(--fg);
+  --color-text-secondary: rgba(232, 230, 227, 0.7);
+  --color-text-tertiary: var(--fg-muted);
+  --color-accent-primary: var(--accent);
+  --color-accent-hover:   #7ac4b4;
+  --color-accent-muted:   var(--accent-soft);
+  --color-success:        #3aa37a;
+  --color-warning:        var(--accent);
+  --color-danger:         #c05a5a;
+  --color-info:           #5a8fb0;
+  --color-border:         var(--border);
+  --color-border-hover:   rgba(255, 255, 255, 0.16);
+  --color-border-accent:  var(--border-accent);
 
-  /* Text */
-  --color-text-primary: #e8e6e3;     /* Main text — warm white */
-  --color-text-secondary: #9a9a9a;   /* Muted text */
-  --color-text-tertiary: #666666;    /* Disabled/placeholder */
-
-  /* Accent — Gold/Amber (detective badge feel) */
-  --color-accent-primary: #c9a84c;   /* Primary gold */
-  --color-accent-hover: #d4b85c;     /* Gold hover */
-  --color-accent-muted: rgba(201, 168, 76, 0.15); /* Gold subtle bg */
-
-  /* Semantic */
-  --color-success: #2d8a4e;          /* Good guess (green, muted) */
-  --color-warning: #c9a84c;          /* Medium guess (gold) */
-  --color-danger: #8b2c2c;           /* Bad guess / danger (deep red) */
-  --color-info: #3a6ea5;             /* Info blue, muted */
-
-  /* Borders */
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-hover: rgba(255, 255, 255, 0.15);
-  --color-border-accent: rgba(201, 168, 76, 0.3);
+  /* Round tiers (used by summary/round-result screens) */
+  --color-round-good: var(--accent);
+  --color-round-mid:  #c9a84c;
+  --color-round-bad:  var(--accent-2);
 
   /* === TYPOGRAPHY === */
-  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-body: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-serif: 'Fraunces', 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans:  'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono-label: 'Space Mono', 'JetBrains Mono', ui-monospace, monospace;
+  --font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
-  --text-xs: 0.75rem;      /* 12px */
-  --text-sm: 0.875rem;     /* 14px */
-  --text-base: 1rem;       /* 16px */
-  --text-lg: 1.125rem;     /* 18px */
-  --text-xl: 1.25rem;      /* 20px */
-  --text-2xl: 1.5rem;      /* 24px */
-  --text-3xl: 1.875rem;    /* 30px */
-  --text-4xl: 2.25rem;     /* 36px */
+  /* Legacy names */
+  --font-heading: var(--font-serif);
+  --font-body:    var(--font-sans);
 
-  --leading-tight: 1.2;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.75;
+  --text-xs:  0.75rem;   /* 12px */
+  --text-sm:  0.875rem;  /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg:  1.125rem;  /* 18px */
+  --text-xl:  1.25rem;   /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  --text-hero: 3.25rem;  /* 52px — briefing */
+  --text-display: 5.5rem; /* 88px — final verdict */
+
+  --leading-tight:   1.05;
+  --leading-normal:  1.4;
+  --leading-relaxed: 1.6;
+
+  /* Tracking (letter-spacing) for mono labels */
+  --tracking-mono: 0.28em;
 
   /* === SPACING === */
-  --space-1: 0.25rem;   /* 4px */
-  --space-2: 0.5rem;    /* 8px */
-  --space-3: 0.75rem;   /* 12px */
-  --space-4: 1rem;      /* 16px */
-  --space-6: 1.5rem;    /* 24px */
-  --space-8: 2rem;      /* 32px */
-  --space-10: 2.5rem;   /* 40px */
-  --space-12: 3rem;     /* 48px */
-  --space-16: 4rem;     /* 64px */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-14: 3.5rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  /* Layout constants from the design */
+  --gutter-width: 60px;
+  --gutter-right-collapsed: 64px;
+  --gutter-right-expanded: 280px;
+  --content-padding-x: 80px;
+  --content-padding-y: 48px;
 
   /* === SHADOWS === */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 20px rgba(201, 168, 76, 0.15);
+  --shadow-glow: 0 0 30px rgba(106, 184, 168, 0.18);
 
   /* === BORDERS === */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
   --radius-full: 9999px;
 
   /* === TRANSITIONS === */
-  --transition-fast: 150ms ease;
+  --transition-fast:   150ms ease;
   --transition-normal: 300ms ease;
-  --transition-slow: 500ms ease;
+  --transition-slow:   500ms ease;
+  --ease-emphasized: cubic-bezier(0.6, 0, 0.2, 1);
 
   /* === Z-INDEX === */
   --z-base: 0;
   --z-dropdown: 10;
+  --z-loader: 60;
   --z-modal: 100;
+  --z-grain: 110;
   --z-toast: 200;
   --z-tooltip: 300;
 }
 
 /* ============================================
-   LIGHT THEME
+   LIGHT THEME — Papel diurno
    ============================================ */
 [data-theme="light"] {
-  /* Background layers (lightest to darkest) */
-  --color-bg-primary: #f5f3f0;
-  --color-bg-secondary: #ffffff;
-  --color-bg-tertiary: #eae7e2;
-  --color-bg-hover: #e0ddd7;
+  --bg:        #f3efe6;
+  --bg-2:      #ebe5d8;
+  --accent:    #2f6d60;
+  --accent-2:  #b85a1a;
+  --fg:        #1d1a15;
+  --fg-muted:  rgba(29, 26, 21, 0.55);
+  --border:    rgba(29, 26, 21, 0.14);
+  --border-accent: rgba(47, 109, 96, 0.4);
+  --accent-soft: rgba(47, 109, 96, 0.12);
+  --grain-mode: multiply;
 
-  /* Text */
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #555555;
-  --color-text-tertiary: #999999;
+  /* Legacy aliases */
+  --color-bg-tertiary:  #dfd8c8;
+  --color-bg-hover:     #d4ccbc;
+  --color-text-secondary: rgba(29, 26, 21, 0.75);
+  --color-accent-hover:   #265a50;
+  --color-success:        #2f7b50;
+  --color-danger:         #a33f3f;
+  --color-info:           #2a5a8a;
 
-  /* Accent — Darker gold for contrast on light */
-  --color-accent-primary: #9a7b2d;
-  --color-accent-hover: #7d6324;
-  --color-accent-muted: rgba(154, 123, 45, 0.12);
+  --color-round-good: var(--accent);
+  --color-round-mid:  #9a7b2d;
+  --color-round-bad:  var(--accent-2);
 
-  /* Semantic */
-  --color-success: #1a7a3a;
-  --color-warning: #9a7b2d;
-  --color-danger: #a33333;
-  --color-info: #2a5a8a;
-
-  /* Borders */
-  --color-border: rgba(0, 0, 0, 0.1);
-  --color-border-hover: rgba(0, 0, 0, 0.2);
-  --color-border-accent: rgba(154, 123, 45, 0.35);
-
-  /* Shadows — lighter */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 20px rgba(154, 123, 45, 0.12);
+  --shadow-glow: 0 0 24px rgba(47, 109, 96, 0.18);
 }

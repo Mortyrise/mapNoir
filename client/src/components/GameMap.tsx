@@ -26,7 +26,8 @@ const DEFAULT_CONFIG = {
   maxZoom: 18,
 }
 
-const ROUND_COLORS = ['#D4A017', '#4A90D9', '#D94A4A', '#4AD97A', '#D94AD9']
+// Per-round guess colors (palette-adjacent to accent-2 orange family)
+const ROUND_COLORS = ['#d97706', '#e89a3d', '#b85a1a', '#c9a84c', '#eca96d']
 
 export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 'dark', resultMarkers, multiResultMarkers }: GameMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -107,15 +108,15 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
     // Clear any existing markers
     adapter.clearMarkers()
 
-    // Place guess marker (gold)
+    // Place guess marker (orange — accent-2 in the new palette)
     adapter.placeMarker(resultMarkers.guess, {
-      color: '#D4A017',
+      color: '#d97706',
       label: 'Your guess',
     })
 
-    // Place actual marker (green)
+    // Place actual marker (teal accent — reveal)
     adapter.placeMarker(resultMarkers.actual, {
-      color: '#2d8a4e',
+      color: '#6ab8a8',
       label: 'Actual location',
     })
 
@@ -142,7 +143,7 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
       const color = ROUND_COLORS[roundIndex % ROUND_COLORS.length]
 
       adapter.placeMarker(guess, { color, label: `Round ${roundIndex + 1}` })
-      adapter.placeMarker(actual, { color: '#2d8a4e' })
+      adapter.placeMarker(actual, { color: '#6ab8a8' })
       adapter.drawLine(guess, actual, { dashed: true })
 
       allPoints.push(guess, actual)

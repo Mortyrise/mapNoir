@@ -2,8 +2,8 @@
    MAP NOIR — Base / Reset Styles
    ============================================ */
 
-/* --- Google Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Fonts are loaded via <link> in index.html for better performance
+   (Fraunces · Space Grotesk · Space Mono · JetBrains Mono). */
 
 /* --- Reset --- */
 *,

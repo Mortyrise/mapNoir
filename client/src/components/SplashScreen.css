@@ -1,0 +1,359 @@
+/* ============================================
+   Splash / Home with globe transition
+   ============================================ */
+.splash-root {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  color: var(--fg);
+  overflow: hidden;
+  font-family: var(--font-sans);
+  z-index: var(--z-loader);
+}
+
+.splash-chrome {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  transition: opacity 700ms ease;
+  pointer-events: auto;
+}
+
+.splash-chrome.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-kicker {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-mono-label);
+  font-size: 10px;
+  color: var(--fg-muted);
+  letter-spacing: 0.3em;
+}
+
+.splash-title-block {
+  position: absolute;
+  bottom: 120px;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.splash-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 44px;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.splash-subtitle {
+  font-family: var(--font-mono-label);
+  font-size: 10px;
+  color: var(--fg-muted);
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.splash-progress {
+  position: absolute;
+  bottom: 62px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+}
+
+.splash-progress-track {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+[data-theme='light'] .splash-progress-track {
+  background: rgba(29, 26, 21, 0.12);
+}
+
+.splash-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  transition: width 80ms linear;
+}
+
+.splash-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-family: var(--font-mono-label);
+  font-size: 9px;
+  color: var(--fg-muted);
+  letter-spacing: 0.2em;
+}
+
+/* ------------ Loader positioning & transition ------------
+   The SVG stays at 340×340 so its rAF loop is never interrupted. The
+   slot is a centered flex container; the inner wrapper applies a single
+   transform that interpolates from "centered at full size" to
+   "top-left-corner dock at ~17% scale" in one fluid motion. */
+.splash-loader-slot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.splash-loader-inner {
+  width: 340px;
+  height: 340px;
+  transform: translate(0, 0) scale(1);
+  transform-origin: center center;
+  transition: transform 900ms var(--ease-emphasized);
+  pointer-events: auto;
+  will-change: transform;
+}
+
+/* When docked, shrink to ~58px and sit inside the home header.
+   Target: final visual box ~58px at top-left (28, 6) → center (57, 35).
+   (Header is ~70px tall, so centering the globe vertically on its baseline
+   keeps it aligned with the title row.) */
+.splash-loader-slot.is-docked .splash-loader-inner {
+  transform:
+    translate(calc(-50vw + 57px), calc(-50vh + 35px))
+    scale(0.170588);
+}
+
+/* ------------ Home content ------------ */
+.splash-home {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 900ms ease 200ms, transform 900ms var(--ease-emphasized) 200ms;
+  pointer-events: none;
+}
+
+.splash-home.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.splash-home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Left pad leaves room for the docked globe (~58px + 34px breathing). */
+  padding: 18px 28px 14px 100px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 70px;
+}
+
+.splash-home-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.splash-title-small {
+  font-size: 22px;
+}
+
+.splash-subtitle-small {
+  font-size: 8px;
+  letter-spacing: 0.25em;
+}
+
+.splash-home-case {
+  font-family: var(--font-mono-label);
+  font-size: 9px;
+  color: var(--fg-muted);
+  letter-spacing: 0.2em;
+}
+
+.splash-home-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
+}
+
+.splash-home-left {
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  border-right: 1px solid var(--border);
+}
+
+.mono-label {
+  font-family: var(--font-mono-label);
+  font-size: 10px;
+  color: var(--fg-muted);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.splash-home-hero {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-hero);
+  color: var(--accent);
+  margin: 0;
+  letter-spacing: 0.01em;
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.splash-home-copy {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--fg-muted);
+  max-width: 380px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.splash-home-right {
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  justify-content: center;
+}
+
+.splash-home-difficulty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.difficulty-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.difficulty-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  cursor: pointer;
+  color: var(--fg);
+  font-family: inherit;
+  transition: background-color var(--transition-fast);
+}
+
+.difficulty-row:hover {
+  background: var(--accent-soft);
+}
+
+.difficulty-row.is-active {
+  background: var(--accent-soft);
+}
+
+.difficulty-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.difficulty-row-name {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--fg);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.difficulty-row.is-active .difficulty-row-name {
+  color: var(--accent);
+}
+
+.difficulty-row-detail {
+  font-family: var(--font-mono-label);
+  font-size: 9px;
+  color: var(--fg-muted);
+  letter-spacing: 0.15em;
+}
+
+.difficulty-row-flag {
+  font-family: var(--font-mono-label);
+  font-size: 9px;
+  color: var(--accent);
+  letter-spacing: 0.25em;
+}
+
+.splash-cta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 28px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 0 32px rgba(106, 184, 168, 0.27);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+[data-theme='light'] .splash-cta {
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.splash-cta:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 40px rgba(106, 184, 168, 0.38);
+}
+
+.splash-cta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ------------ Responsive ------------ */
+@media (max-width: 900px) {
+  .splash-home-body {
+    grid-template-columns: 1fr;
+  }
+  .splash-home-left {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 28px 32px;
+    gap: 16px;
+  }
+  .splash-home-right {
+    padding: 28px 32px;
+  }
+  .splash-home-hero {
+    font-size: 38px;
+  }
+  .splash-home-header {
+    padding: 14px 20px 14px 92px;
+  }
+}

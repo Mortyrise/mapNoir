@@ -2,9 +2,9 @@
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
+  background: var(--bg-2);
 }
 
 .game-map {
@@ -12,59 +12,82 @@
   height: 100%;
 }
 
-/* Override Leaflet default styles to match current theme */
+/* Tint the Leaflet CARTO tiles slightly toward teal so the map reads as
+   part of the noir palette without losing legibility. */
+[data-theme='dark'] .game-map .leaflet-tile-pane {
+  filter: hue-rotate(-8deg) saturate(0.65) brightness(0.92) contrast(1.05);
+}
+
+[data-theme='light'] .game-map .leaflet-tile-pane {
+  filter: sepia(0.15) saturate(0.9) contrast(0.98);
+}
+
+/* Zoom controls */
+.game-map .leaflet-control-zoom {
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+
 .game-map .leaflet-control-zoom a {
-  background-color: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  border-color: var(--color-border);
+  background-color: var(--bg-2);
+  color: var(--fg);
+  border-color: var(--border);
+  font-family: var(--font-mono-label);
+  font-size: 14px;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .game-map .leaflet-control-zoom a:hover {
-  background-color: var(--color-bg-hover);
+  background-color: var(--accent-soft);
+  color: var(--accent);
 }
 
 .game-map .leaflet-control-attribution {
-  background-color: var(--color-bg-secondary);
-  color: var(--color-text-tertiary);
-  font-size: var(--text-xs);
+  background-color: rgba(7, 9, 10, 0.7);
+  color: var(--fg-muted);
+  font-family: var(--font-mono-label);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+}
+
+[data-theme='light'] .game-map .leaflet-control-attribution {
+  background-color: rgba(243, 239, 230, 0.75);
 }
 
 .game-map .leaflet-control-attribution a {
-  color: var(--color-text-secondary);
+  color: var(--fg);
 }
 
 /* Custom marker tooltip */
 .map-noir-tooltip {
-  background-color: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-accent);
+  background-color: var(--bg-2);
+  color: var(--fg);
+  border: 1px solid var(--border-accent);
   border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
+  font-family: var(--font-mono-label);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 4px 8px;
   box-shadow: var(--shadow-md);
 }
 
 .map-noir-tooltip::before {
-  border-top-color: var(--color-border-accent);
+  border-top-color: var(--border-accent);
 }
 
-/* Pin drop animation — target the inner div, not the Leaflet-positioned container */
+/* Pin drop animation */
 .map-noir-marker > div {
   animation: pin-drop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @keyframes pin-drop {
-  from {
-    opacity: 0;
-    transform: translateY(-24px) scale(0.6);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(-24px) scale(0.6); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Line draw-in animation for result views */
+/* Line fade-in on result screens */
 .round-result-map .leaflet-overlay-pane,
 .final-summary-map .leaflet-overlay-pane {
   animation: line-reveal 0.6s ease-out 0.3s both;
@@ -72,21 +95,25 @@
 
 @keyframes line-reveal {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
-/* Coordinates display */
+/* Coordinates overlay (legacy, kept for result screens that still use it) */
 .game-map-coords {
   position: absolute;
-  bottom: var(--space-3);
-  left: var(--space-3);
+  bottom: 8px;
+  left: 8px;
   z-index: var(--z-dropdown);
-  padding: var(--space-1) var(--space-3);
-  background-color: var(--color-bg-secondary);
-  color: var(--color-accent-primary);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-accent);
+  padding: 2px 8px;
+  background-color: rgba(7, 9, 10, 0.6);
+  color: var(--accent);
+  font-family: var(--font-mono-label);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  border: 1px solid var(--border-accent);
   pointer-events: none;
+}
+
+[data-theme='light'] .game-map-coords {
+  background-color: rgba(243, 239, 230, 0.72);
 }

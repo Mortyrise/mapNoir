@@ -10,23 +10,23 @@ const TILE_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
 
 const MARKER_COLORS = {
-  dark: '#D4A017',
-  light: '#9a7b2d',
+  dark: '#d97706',
+  light: '#b85a1a',
 }
 
 const MARKER_BORDER = {
-  dark: '#1a1a1a',
-  light: '#ffffff',
+  dark: '#07090a',
+  light: '#f3efe6',
 }
 
 const LINE_COLORS = {
   dark: {
-    outline: 'rgba(212, 160, 23, 0.2)',
-    foreground: 'rgba(212, 160, 23, 0.8)',
+    outline: 'rgba(106, 184, 168, 0.22)',
+    foreground: 'rgba(106, 184, 168, 0.85)',
   },
   light: {
-    outline: 'rgba(255, 255, 255, 0.8)',
-    foreground: 'rgba(100, 75, 25, 0.85)',
+    outline: 'rgba(47, 109, 96, 0.18)',
+    foreground: 'rgba(47, 109, 96, 0.9)',
   },
 }
 

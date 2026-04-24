@@ -1,3 +1,5 @@
+import { Icon } from './icons/Icon'
+
 interface MuteToggleProps {
   muted: boolean
   onToggle: () => void
@@ -6,14 +8,13 @@ interface MuteToggleProps {
 export function MuteToggle({ muted, onToggle }: MuteToggleProps) {
   return (
     <button
-      className="btn btn-ghost btn-sm mute-toggle"
+      type="button"
+      className="mute-toggle"
       onClick={onToggle}
       aria-label={muted ? 'Unmute' : 'Mute'}
       title={muted ? 'Unmute' : 'Mute'}
     >
-      <span aria-hidden="true">
-        {muted ? '\u{1F507}' : '\u{1F509}'}
-      </span>
+      <Icon name={muted ? 'mute' : 'sound'} size={16} stroke="currentColor" />
     </button>
   )
 }

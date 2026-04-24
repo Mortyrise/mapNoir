@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { GameMap } from './GameMap'
+import { Icon } from './icons/Icon'
 import { useCountUp } from '../hooks/useCountUp'
 import type { Difficulty, RoundSummaryEntry } from '../types'
 import './FinalSummaryScreen.css'
@@ -17,19 +17,9 @@ interface FinalSummaryScreenProps {
   loading: boolean
 }
 
-function distanceColor(km: number): string {
-  if (km < 200) return 'var(--color-round-good)'
-  if (km < 1000) return 'var(--color-round-mid)'
-  return 'var(--color-round-bad)'
-}
+type Tier = 'good' | 'mid' | 'bad'
 
-function distanceClass(km: number): string {
-  if (km < 200) return 'round-good'
-  if (km < 1000) return 'round-mid'
-  return 'round-bad'
-}
-
-function conclusionTier(totalScore: number): 'good' | 'mid' | 'bad' {
+function conclusionTier(totalScore: number): Tier {
   if (totalScore >= 15000) return 'good'
   if (totalScore >= 8000) return 'mid'
   return 'bad'
@@ -37,6 +27,13 @@ function conclusionTier(totalScore: number): 'good' | 'mid' | 'bad' {
 
 function interpolate(template: string, vars: Record<string, string | number>): string {
   return template.replace(/\{(\w+)\}/g, (_, key) => String(vars[key] ?? ''))
+}
+
+function avgAccuracy(rounds: RoundSummaryEntry[]): number {
+  if (rounds.length === 0) return 0
+  // Simple heuristic: 100% at 0km, 0% at 2000km or more.
+  const score = rounds.reduce((acc, r) => acc + Math.max(0, 1 - Math.min(1, r.distanceKm / 2000)), 0)
+  return Math.round((score / rounds.length) * 100)
 }
 
 export function FinalSummaryScreen({
@@ -47,7 +44,6 @@ export function FinalSummaryScreen({
   totalScore,
   shareableText,
   onPlayAgain,
-  theme,
   t,
   loading,
 }: FinalSummaryScreenProps) {
@@ -55,9 +51,14 @@ export function FinalSummaryScreen({
   const animatedTotal = useCountUp(totalScore, 1500)
   const tier = conclusionTier(totalScore)
 
-  // Best and worst rounds
+  const hits = rounds.filter((r) => r.distanceKm < 500).length
+  const totalRounds = rounds.length
+  const accuracy = avgAccuracy(rounds)
+
   const bestRound = rounds.reduce((a, b) => (a.distanceKm <= b.distanceKm ? a : b))
   const worstRound = rounds.reduce((a, b) => (a.distanceKm >= b.distanceKm ? a : b))
+
+  const caseCode = caseNumber.toString().padStart(3, '0') + '-B'
 
   const handleCopy = async () => {
     try {
@@ -76,90 +77,133 @@ export function FinalSummaryScreen({
     }
   }
 
-  const multiResultMarkers = rounds.map((r) => ({
-    guess: r.guessLocation,
-    actual: r.actualLocation,
-    roundIndex: r.roundIndex,
-  }))
+  // Split the verdict title so the last word gets the italic accent treatment.
+  const verdictRaw = t(`summary.verdict.${tier}`)
+  const words = verdictRaw.trim().split(' ')
+  const lastWord = words.pop() ?? ''
+  const leadingWords = words.join(' ')
 
   return (
     <div className="final-summary-screen">
-      <div className="final-summary-header">
-        <p className="final-summary-case-label">
-          {t('session.case')} #{caseNumber} — {t(`difficulty.${difficulty}`)}
-        </p>
-        <h2 className="final-summary-title">{caseName}</h2>
-
-        <div className="final-summary-total">
-          <span className="final-summary-total-value">{animatedTotal.toLocaleString()}</span>
-          <span className="final-summary-total-label">{t('summary.totalScore')}</span>
-        </div>
-
-        <div className="final-summary-debrief">
-          <p className={`final-summary-conclusion conclusion-${tier}`}>
-            {t(`summary.conclusion.${tier}`)}
-          </p>
-          <p className="final-summary-recap">
-            {interpolate(t('summary.bestRound'), { round: bestRound.roundIndex + 1, distance: bestRound.distanceKm.toLocaleString() })}
-            {' '}
-            {interpolate(t('summary.worstRound'), { round: worstRound.roundIndex + 1, distance: worstRound.distanceKm.toLocaleString() })}
-          </p>
-        </div>
-
-        <div className="round-dots">
-          {rounds.map((round) => (
-            <div
-              key={round.roundIndex}
-              className={`round-dot ${distanceClass(round.distanceKm)}`}
-              title={`${t('summary.round')} ${round.roundIndex + 1}: ${round.score.toLocaleString()} pts — ${round.distanceKm.toLocaleString()} km`}
-            />
-          ))}
-        </div>
+      <div className="gutter-left">
+        <span className="gutter-top">MAP NOIR · LAST KNOWN LOCATION</span>
+        <span className="gutter-bottom">{t('summary.verdictGutter')} · C-{caseCode}</span>
       </div>
 
-      <div className="final-summary-body">
-        <div className="final-summary-map">
-          <GameMap
-            theme={theme}
-            disabled
-            multiResultMarkers={multiResultMarkers}
-          />
-        </div>
+      <div className="final-summary-layout">
+        {/* LEFT — verdict */}
+        <section className="final-summary-verdict">
+          <header className="final-summary-verdict-head">
+            <span>{t('summary.verdictHead').toUpperCase()}</span>
+            <span>
+              {rounds.length.toString().padStart(2, '0')} / {totalRounds.toString().padStart(2, '0')}{' '}
+              {t('game.round').toUpperCase()}S
+            </span>
+          </header>
 
-        <div className="final-summary-sidebar">
-          <div className="final-summary-table">
-            {rounds.map((round) => (
-              <div
-                key={round.roundIndex}
-                className={`summary-table-row ${distanceClass(round.distanceKm)}`}
-              >
-                <span className="summary-table-round">{round.roundIndex + 1}</span>
-                <span
-                  className="summary-table-indicator"
-                  style={{ backgroundColor: distanceColor(round.distanceKm) }}
-                />
-                <span className="summary-table-distance">{round.distanceKm.toLocaleString()} km</span>
-                <span className="summary-table-score">{round.score.toLocaleString()}</span>
-              </div>
-            ))}
+          <div>
+            <div className="final-summary-hits">
+              {hits}/{totalRounds} {t('summary.hits').toUpperCase()}
+            </div>
+            <h1 className="final-summary-title">
+              {leadingWords}
+              {leadingWords ? <br /> : null}
+              <span className="final-summary-title-accent">{lastWord}</span>
+            </h1>
+            <p className="final-summary-recap">
+              {t(`summary.conclusion.${tier}`)}
+            </p>
           </div>
 
-          <div className="final-summary-share">
-            <pre className="share-text">{shareableText}</pre>
+          <div className="final-summary-totals">
+            <div className="final-summary-total">
+              <span className="mono-label">{t('summary.totalScore').toUpperCase()}</span>
+              <span className="final-summary-total-value accent">
+                {animatedTotal.toLocaleString()}
+              </span>
+            </div>
+            <div className="final-summary-total">
+              <span className="mono-label">{t('summary.accuracy').toUpperCase()}</span>
+              <span className="final-summary-total-value">
+                {accuracy}
+                <span className="final-summary-total-pct">%</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="final-summary-actions">
+            <button type="button" className="btn-cta" onClick={onPlayAgain} disabled={loading}>
+              <span>{loading ? '…' : t('summary.playAgain')}</span>
+              <Icon name="arrow" size={18} />
+            </button>
             <button
-              className={`btn btn-sm ${copied ? 'btn-primary' : 'btn-ghost'}`}
+              type="button"
+              className="btn-ghost-mono"
               onClick={handleCopy}
+              title={t('summary.share')}
             >
               {copied ? t('summary.copied') : t('summary.share')}
             </button>
           </div>
+        </section>
 
-          <div className="final-summary-actions">
-            <button className="btn btn-primary btn-lg" onClick={onPlayAgain} disabled={loading}>
-              {loading ? '...' : t('summary.playAgain')}
-            </button>
+        {/* RIGHT — ledger */}
+        <section className="final-summary-ledger">
+          <header className="final-summary-ledger-head">
+            <span>{t('summary.ledger').toUpperCase()}</span>
+            <span>
+              {t('summary.round').toUpperCase()} · {t('summary.distance').toUpperCase()} · {t('summary.score').toUpperCase()}
+            </span>
+          </header>
+
+          <div className="final-summary-ledger-rows">
+            {rounds.map((r) => {
+              const hit = r.distanceKm < 500
+              const n = (r.roundIndex + 1).toString().padStart(2, '0')
+              return (
+                <div key={r.roundIndex} className={`ledger-row ${hit ? 'is-hit' : 'is-miss'}`}>
+                  <div className="ledger-n">{n}</div>
+                  <div className="ledger-city">
+                    {r.actualLocation.lat.toFixed(2)}°, {r.actualLocation.lng.toFixed(2)}°
+                  </div>
+                  <div className="ledger-dist">
+                    {r.distanceKm.toLocaleString()} km
+                  </div>
+                  <div className="ledger-pts">{r.score.toLocaleString()}</div>
+                  <div className="ledger-icon">
+                    <Icon
+                      name={hit ? 'check' : 'x'}
+                      size={14}
+                      stroke="currentColor"
+                      weight={1.5}
+                    />
+                  </div>
+                </div>
+              )
+            })}
           </div>
-        </div>
+
+          <footer className="final-summary-ledger-foot">
+            <span>
+              {interpolate(t('summary.bestRound'), {
+                round: bestRound.roundIndex + 1,
+                distance: bestRound.distanceKm.toLocaleString(),
+              })}
+            </span>
+            <span>
+              {interpolate(t('summary.worstRound'), {
+                round: worstRound.roundIndex + 1,
+                distance: worstRound.distanceKm.toLocaleString(),
+              })}
+            </span>
+          </footer>
+
+          <div className="final-summary-meta">
+            <span className="mono-label">
+              {t('session.case')} #{caseCode} · {caseName} · {t(`difficulty.${difficulty}`).toUpperCase()}
+            </span>
+          </div>
+        </section>
       </div>
     </div>
   )

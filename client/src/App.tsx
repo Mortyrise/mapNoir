@@ -1,24 +1,20 @@
-import { useState, useCallback, useRef } from 'react'
-import { GameMap } from './components/GameMap'
-import { SceneViewer } from './components/SceneViewer'
-import { ThemeToggle } from './components/ThemeToggle'
-import { MuteToggle } from './components/MuteToggle'
-import { Timer } from './components/Timer'
-import { ResourceBar } from './components/ResourceBar'
-import { CluePanel } from './components/CluePanel'
-import { LanguageSelector } from './components/LanguageSelector'
+import { useCallback, useRef, useState } from 'react'
+import { SplashScreen } from './components/SplashScreen'
+import { BriefingScreen } from './components/BriefingScreen'
+import { HudView } from './components/HudView'
 import { RoundResultScreen } from './components/RoundResultScreen'
 import { FinalSummaryScreen } from './components/FinalSummaryScreen'
+import { ThemeToggle } from './components/ThemeToggle'
+import { MuteToggle } from './components/MuteToggle'
+import { LanguageSelector } from './components/LanguageSelector'
 import { useTheme } from './hooks/useTheme'
 import { useLanguage } from './hooks/useLanguage'
 import { useTranslation } from './hooks/useTranslation'
 import { useSounds } from './hooks/useSounds'
+import { useCountdown } from './hooks/useCountdown'
 import { api } from './services/api'
 import './components/GameMap.css'
 import './components/SceneViewer.css'
-import './components/Timer.css'
-import './components/ResourceBar.css'
-import './components/CluePanel.css'
 import './components/RoundResultScreen.css'
 import './components/FinalSummaryScreen.css'
 import './App.css'
@@ -50,7 +46,6 @@ interface ResourceState {
 const MAPILLARY_TOKEN = import.meta.env.MAPILLARY_TOKEN || ''
 const GOOGLE_API_KEY = import.meta.env.GOOGLE_MAPS_API_KEY || ''
 
-const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
 const TOTAL_ROUNDS = 5
 
 function App() {
@@ -59,7 +54,6 @@ function App() {
   const t = useTranslation(language)
   const { play, muted, toggleMute } = useSounds()
 
-  // Core UI state
   const [gameState, setGameState] = useState<GameState>('idle')
   const [gameData, setGameData] = useState<GameData | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(null)
@@ -74,7 +68,6 @@ function App() {
     cluesAvailable: 3,
   })
 
-  // Session state
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [caseNumber, setCaseNumber] = useState<number>(0)
   const [caseName, setCaseName] = useState<string>('')
@@ -88,8 +81,6 @@ function App() {
   const selectedLocationRef = useRef<LatLng | null>(null)
   selectedLocationRef.current = selectedLocation
 
-  // Helper to set up a round's game data from server response
-  // Energy is NOT reset — it's shared across the session
   const setupRound = useCallback((game: {
     gameId: string
     imageId: string
@@ -118,7 +109,6 @@ function App() {
     gameIdRef.current = game.gameId
     setSelectedLocation(null)
     selectedLocationRef.current = null
-    // Reset per-round state but preserve energy from session
     setResources(prev => ({
       energy: sessionEnergy ?? prev.energy,
       movementUnlocked: false,
@@ -128,7 +118,6 @@ function App() {
     }))
   }, [])
 
-  // Start a new 5-round session
   const startSession = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -140,10 +129,8 @@ function App() {
       setCurrentRound(data.currentRound)
       setBriefResult(null)
       setSessionSummary(null)
-
       setMaxEnergy(data.maxEnergy)
 
-      // Pick a random briefing intro
       const introCount = parseInt(t('briefing.caseIntro.count'), 10) || 10
       const introIndex = Math.floor(Math.random() * introCount) + 1
       setCaseIntro(t(`briefing.caseIntro.${introIndex}`))
@@ -158,7 +145,6 @@ function App() {
     }
   }, [difficulty, language, t, setupRound])
 
-  // Player finished reading the briefing, start the timer and show the scene
   const startInvestigation = useCallback(async () => {
     if (!gameData) return
     try {
@@ -169,7 +155,6 @@ function App() {
     }
   }, [gameData])
 
-  // Submit guess for current round
   const submitGuess = useCallback(async (guessLocation: LatLng | null) => {
     const currentSessionId = sessionId
     if (!currentSessionId) return
@@ -182,7 +167,6 @@ function App() {
       play('guess-submit')
       const result = await api.submitSessionGuess(currentSessionId, loc.lat, loc.lng)
 
-      // Play result sound
       play(result.distanceKm < 500 ? 'result-good' : 'result-bad')
 
       setBriefResult({
@@ -190,7 +174,6 @@ function App() {
         guessLocation: loc,
       })
 
-      // Update shared energy from server
       if (result.energyRemaining !== undefined) {
         setResources(prev => ({ ...prev, energy: result.energyRemaining }))
       }
@@ -216,7 +199,6 @@ function App() {
     submitGuess(selectedLocationRef.current)
   }, [submitGuess])
 
-  // Advance to next round
   const handleNextRound = useCallback(async () => {
     if (!sessionId) return
     setLoading(true)
@@ -224,10 +206,8 @@ function App() {
     try {
       const data = await api.nextRound(sessionId)
       setCurrentRound(data.currentRound)
-      // Pass current energy — setupRound will preserve it (shared across session)
       setupRound(data.game)
 
-      // Start timer immediately (no briefing for rounds 2-5)
       await api.startTimer(data.game.gameId)
       setGameState('playing')
     } catch (err) {
@@ -237,7 +217,6 @@ function App() {
     }
   }, [sessionId, setupRound])
 
-  // Show final summary
   const handleViewSummary = useCallback(() => {
     play('session-complete')
     setGameState('finalSummary')
@@ -273,167 +252,91 @@ function App() {
     play('timer-tick')
   }, [play])
 
+  // Countdown is active only while playing. Reset via key (currentRound).
+  const remainingSeconds = useCountdown({
+    timeLimit: gameData?.timeLimit ?? 60,
+    onTimeUp: handleTimeUp,
+    onUrgentTick: handleTimerTick,
+    enabled: gameState === 'playing',
+    paused: gameState !== 'playing',
+  })
+
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="app-header-content">
-          <div className="app-brand">
-            <h1 className="app-title">{t('app.title')}</h1>
-            <p className="app-subtitle">{t('app.subtitle')}</p>
-          </div>
-          <div className="app-header-controls">
-            <LanguageSelector language={language} onChange={setLanguage} />
-            <MuteToggle muted={muted} onToggle={toggleMute} />
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          </div>
-        </div>
-      </header>
+      <div className="app-floating-controls">
+        <LanguageSelector language={language} onChange={setLanguage} />
+        <MuteToggle muted={muted} onToggle={toggleMute} />
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+      </div>
 
       <main className="app-main">
         {error && (
-          <div className="error-banner">
+          <div className="error-banner" role="alert">
             <p>{error}</p>
-            <button className="btn btn-ghost btn-sm" onClick={() => setError(null)}>
+            <button className="btn-outline" onClick={() => setError(null)}>
               {t('error.dismiss')}
             </button>
           </div>
         )}
 
         {gameState === 'idle' && (
-          <div className="idle-screen">
-            <div className="idle-content">
-              <h2 className="idle-title">{t('idle.title')}</h2>
-              <p className="idle-description">{t('idle.description')}</p>
-
-              <div className="difficulty-selector">
-                <span className="difficulty-label">{t('idle.difficulty')}</span>
-                <div className="difficulty-options">
-                  {DIFFICULTIES.map((d) => (
-                    <button
-                      key={d}
-                      className={`btn btn-sm ${d === difficulty ? 'btn-primary' : 'btn-secondary'}`}
-                      onClick={() => setDifficulty(d)}
-                    >
-                      <span>{t(`difficulty.${d}`)}</span>
-                      <span className="difficulty-detail">{t(`difficulty.${d}.detail`)}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                className="btn btn-primary btn-lg"
-                onClick={startSession}
-                disabled={loading}
-              >
-                {loading ? t('idle.loading') : t('idle.newCase')}
-              </button>
-            </div>
-          </div>
+          <SplashScreen
+            difficulty={difficulty}
+            onDifficultyChange={setDifficulty}
+            onStart={startSession}
+            loading={loading}
+            t={t}
+          />
         )}
 
-        {/* Game layout renders during briefing (hidden) to preload the scene */}
-        {(gameState === 'briefing' || gameState === 'playing') && gameData && (
-          <div className="game-layout">
-            <div className="scene-panel">
-              {gameState === 'playing' && (
-                <div className="scene-hud">
-                  <div className="round-indicator">
-                    {t('game.round')} {currentRound + 1}/{TOTAL_ROUNDS}
-                  </div>
-                  <Timer
-                    key={currentRound}
-                    timeLimit={gameData.timeLimit}
-                    onTimeUp={handleTimeUp}
-                    onUrgentTick={handleTimerTick}
-                  />
-                  <ResourceBar
-                    energy={resources.energy}
-                    maxEnergy={maxEnergy}
-                    movementUnlocked={resources.movementUnlocked}
-                    hasBet={resources.hasBet}
-                    cluesAvailable={resources.cluesAvailable > 0}
-                    onAction={handleAction}
-                    t={t}
-                  />
-                </div>
-              )}
-              <SceneViewer
-                provider={gameData.provider}
-                imageId={gameData.imageId}
-                mapillaryToken={MAPILLARY_TOKEN}
-                gameId={gameData.gameId}
-                lat={gameData.searchLat}
-                lng={gameData.searchLng}
-                googleApiKey={GOOGLE_API_KEY}
-                interactive={resources.movementUnlocked}
-                t={t}
-              />
-              {gameState === 'playing' && (
-                <CluePanel
-                  initialClue={gameData.initialClue}
-                  revealedClues={resources.revealedClues}
-                  t={t}
-                />
-              )}
-            </div>
-            {gameState === 'playing' && (
-              <div className="map-panel">
-                <GameMap
-                  key={`map-${currentRound}`}
-                  onLocationSelect={handleLocationSelect}
-                  theme={theme}
-                />
-                <div className="map-actions">
-                  <button
-                    className="btn btn-primary"
-                    onClick={confirmGuess}
-                    disabled={!selectedLocation || loading}
-                  >
-                    {loading ? t('game.submitting') : t('game.confirmLocation')}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Briefing overlay — scene loads behind it */}
         {gameState === 'briefing' && gameData && (
-          <div className="briefing-overlay">
-            <div className="briefing-content">
-              <p className="briefing-case-label">{t('session.case')} #{caseNumber}</p>
-              <h2 className="briefing-title">{caseName}</h2>
-              <p className="briefing-subtitle">{caseIntro}</p>
+          <BriefingScreen
+            caseNumber={caseNumber}
+            caseName={caseName}
+            caseIntro={caseIntro}
+            clueText={gameData.initialClue}
+            roundNumber={currentRound + 1}
+            totalRounds={TOTAL_ROUNDS}
+            timeLimit={gameData.timeLimit}
+            energy={gameData.energy}
+            cluesAvailable={resources.cluesAvailable}
+            difficulty={gameData.difficulty}
+            onStart={startInvestigation}
+            t={t}
+          />
+        )}
 
-              <div className="briefing-clue">
-                <span className="clue-tag">{t('clue.intel')}</span>
-                <p className="briefing-clue-text">{gameData.initialClue}</p>
-              </div>
-
-              <div className="briefing-meta">
-                <div className="briefing-meta-item">
-                  <span className="briefing-meta-label">{t('briefing.difficulty')}</span>
-                  <span className="briefing-meta-value">{t(`difficulty.${gameData.difficulty}`)}</span>
-                </div>
-                <div className="briefing-meta-item">
-                  <span className="briefing-meta-label">{t('briefing.timeLimit')}</span>
-                  <span className="briefing-meta-value">{gameData.timeLimit}{t('briefing.seconds')}</span>
-                </div>
-                <div className="briefing-meta-item">
-                  <span className="briefing-meta-label">{t('briefing.energy')}</span>
-                  <span className="briefing-meta-value">{gameData.energy}</span>
-                </div>
-              </div>
-
-              <button
-                className="btn btn-primary btn-lg briefing-start-btn"
-                onClick={startInvestigation}
-              >
-                {t('briefing.start')}
-              </button>
-            </div>
-          </div>
+        {gameState === 'playing' && gameData && (
+          <HudView
+            provider={gameData.provider}
+            imageId={gameData.imageId}
+            mapillaryToken={MAPILLARY_TOKEN}
+            gameId={gameData.gameId}
+            searchLat={gameData.searchLat}
+            searchLng={gameData.searchLng}
+            googleApiKey={GOOGLE_API_KEY}
+            movementUnlocked={resources.movementUnlocked}
+            timeLimit={gameData.timeLimit}
+            remainingSeconds={remainingSeconds}
+            onTimeUp={handleTimeUp}
+            energy={resources.energy}
+            maxEnergy={maxEnergy}
+            caseNumber={caseNumber}
+            roundIndex={currentRound}
+            totalRounds={TOTAL_ROUNDS}
+            difficulty={gameData.difficulty}
+            initialClue={gameData.initialClue}
+            revealedClues={resources.revealedClues}
+            hasBet={resources.hasBet}
+            cluesAvailable={resources.cluesAvailable}
+            onAction={handleAction}
+            onLocationSelect={handleLocationSelect}
+            onConfirm={confirmGuess}
+            selectedLocation={selectedLocation}
+            loading={loading}
+            theme={theme}
+            t={t}
+          />
         )}
 
         {gameState === 'roundResult' && briefResult && (
@@ -446,6 +349,7 @@ function App() {
             actualLocation={briefResult.actualLocation}
             isLastRound={briefResult.isLastRound}
             caseName={caseName}
+            caseNumber={caseNumber}
             onNextRound={handleNextRound}
             onViewSummary={handleViewSummary}
             theme={theme}

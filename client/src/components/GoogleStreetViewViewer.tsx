@@ -36,8 +36,6 @@ export function GoogleStreetViewViewer({ gameId, lat, lng, apiKey, interactive =
   useEffect(() => {
     if (!containerRef.current) return
 
-    let panorama: google.maps.StreetViewPanorama | null = null
-
     async function init() {
       try {
         await loadGoogleMapsApi(apiKey)
@@ -61,7 +59,7 @@ export function GoogleStreetViewViewer({ gameId, lat, lng, apiKey, interactive =
         // Report actual panorama location to server for accurate scoring
         api.reportPanoLocation(gameId, panoLocation.lat(), panoLocation.lng()).catch(() => {})
 
-        panorama = new google.maps.StreetViewPanorama(containerRef.current!, {
+        new google.maps.StreetViewPanorama(containerRef.current!, {
           pano: response.data.location.pano,
           disableDefaultUI: true,
           showRoadLabels: false,
@@ -83,12 +81,8 @@ export function GoogleStreetViewViewer({ gameId, lat, lng, apiKey, interactive =
     }
 
     init()
-
-    return () => {
-      // Google StreetViewPanorama doesn't have a destroy method
-      // but it gets GC'd when the container is removed
-      panorama = null
-    }
+    // Google StreetViewPanorama has no destroy method; it is GC'd when the
+    // container node is unmounted.
   }, [gameId, lat, lng, apiKey, interactive])
 
   if (error) {
