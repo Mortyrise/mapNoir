@@ -1,8 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
-import { LeafletMapAdapter } from '../adapters/LeafletMapAdapter'
 import type { MapAdapter } from '../adapters/MapAdapter'
 import type { LatLng } from '../types'
-import 'leaflet/dist/leaflet.css'
 
 interface MultiResultMarker {
   guess: LatLng
@@ -34,27 +32,37 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
   const adapterRef = useRef<MapAdapter | null>(null)
   const markerIdRef = useRef<string | null>(null)
   const [coords, setCoords] = useState<LatLng | null>(selectedLocation ?? null)
+  // Tracks adapter readiness so dependent effects re-run after the lazy
+  // import resolves. MapLibre + its CSS live in a separate chunk.
+  const [mapReady, setMapReady] = useState(false)
 
-  // Initialize map
   useEffect(() => {
     if (!containerRef.current || adapterRef.current) return
+    let cancelled = false
 
-    const adapter = new LeafletMapAdapter()
-    adapter.initialize(containerRef.current, DEFAULT_CONFIG)
-    adapterRef.current = adapter
+    void (async () => {
+      await import('maplibre-gl/dist/maplibre-gl.css')
+      const { MapLibreMapAdapter } = await import('../adapters/MapLibreMapAdapter')
+      if (cancelled || !containerRef.current) return
+      const adapter = new MapLibreMapAdapter()
+      adapter.initialize(containerRef.current, DEFAULT_CONFIG)
+      adapterRef.current = adapter
+      setMapReady(true)
+    })()
 
     return () => {
-      adapter.destroy()
+      cancelled = true
+      adapterRef.current?.destroy()
       adapterRef.current = null
+      setMapReady(false)
     }
   }, [])
 
-  // Sync theme with map adapter
   useEffect(() => {
+    if (!mapReady) return
     adapterRef.current?.setTheme(theme)
-  }, [theme])
+  }, [theme, mapReady])
 
-  // Handle map clicks
   const handleMapClick = useCallback(
     (position: LatLng) => {
       if (disabled) return
@@ -62,12 +70,10 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
       const adapter = adapterRef.current
       if (!adapter) return
 
-      // Remove previous marker
       if (markerIdRef.current) {
         adapter.removeMarker(markerIdRef.current)
       }
 
-      // Place new marker
       markerIdRef.current = adapter.placeMarker(position, {
         draggable: true,
       })
@@ -78,15 +84,15 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
     [disabled, onLocationSelect]
   )
 
-  // Register click handler
   useEffect(() => {
+    if (!mapReady) return
     const adapter = adapterRef.current
     if (!adapter) return
     adapter.onMapClick(handleMapClick)
-  }, [handleMapClick])
+  }, [handleMapClick, mapReady])
 
-  // Sync external selectedLocation changes
   useEffect(() => {
+    if (!mapReady) return
     if (!selectedLocation) return
     const adapter = adapterRef.current
     if (!adapter) return
@@ -97,40 +103,35 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
 
     markerIdRef.current = adapter.placeMarker(selectedLocation)
     setCoords(selectedLocation)
-  }, [selectedLocation])
+  }, [selectedLocation, mapReady])
 
-  // Show result markers (guess + actual + line)
   useEffect(() => {
+    if (!mapReady) return
     if (!resultMarkers) return
     const adapter = adapterRef.current
     if (!adapter) return
 
-    // Clear any existing markers
     adapter.clearMarkers()
 
-    // Place guess marker (orange — accent-2 in the new palette)
     adapter.placeMarker(resultMarkers.guess, {
       color: '#d97706',
       label: 'Your guess',
     })
 
-    // Place actual marker (teal accent — reveal)
     adapter.placeMarker(resultMarkers.actual, {
       color: '#6ab8a8',
       label: 'Actual location',
     })
 
-    // Draw dashed line between them
     adapter.drawLine(resultMarkers.guess, resultMarkers.actual, {
       dashed: true,
     })
 
-    // Fit bounds to show both markers
     adapter.fitBounds([resultMarkers.guess, resultMarkers.actual])
-  }, [resultMarkers])
+  }, [resultMarkers, mapReady])
 
-  // Show multiple result markers (final summary with all rounds)
   useEffect(() => {
+    if (!mapReady) return
     if (!multiResultMarkers || multiResultMarkers.length === 0) return
     const adapter = adapterRef.current
     if (!adapter) return
@@ -159,7 +160,7 @@ export function GameMap({ onLocationSelect, selectedLocation, disabled, theme = 
       }
       adapter.fitBounds([{ lat: minLat, lng: minLng }, { lat: maxLat, lng: maxLng }])
     }
-  }, [multiResultMarkers])
+  }, [multiResultMarkers, mapReady])
 
   return (
     <div className="game-map-container">

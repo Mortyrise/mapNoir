@@ -689,7 +689,7 @@
   width: 100%;
 }
 
-/* Grid overlay on top of the Leaflet tile */
+/* Grid overlay on top of the MapLibre canvas */
 .hud-map-surface::after {
   content: '';
   position: absolute;
@@ -762,8 +762,9 @@
   border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  /* Above Leaflet panes (which go up to 700) so the panel never gets
-     clipped by the map when it expands over the stage. */
+  /* Above MapLibre's control container (z-index ~2) and any in-canvas
+     content so the panel never gets clipped by the map when it expands
+     over the stage. */
   z-index: 800;
   transition: width 280ms var(--ease-emphasized),
     background-color 280ms var(--ease-emphasized),

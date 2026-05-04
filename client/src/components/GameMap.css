@@ -12,23 +12,27 @@
   height: 100%;
 }
 
-/* Tint the Leaflet CARTO tiles slightly toward teal so the map reads as
-   part of the noir palette without losing legibility. */
-[data-theme='dark'] .game-map .leaflet-tile-pane {
+/* Tint the MapLibre canvas slightly toward teal so the map reads as
+   part of the noir palette without losing legibility.
+   NOTE: this is a CSS filter on the WebGL canvas — markers and controls are
+   DOM siblings and unaffected. Long-term this should move to vector style
+   paint properties (see docs/maplibre-globe-migration.md). */
+[data-theme='dark'] .game-map .maplibregl-canvas {
   filter: hue-rotate(-8deg) saturate(0.65) brightness(0.92) contrast(1.05);
 }
 
-[data-theme='light'] .game-map .leaflet-tile-pane {
+[data-theme='light'] .game-map .maplibregl-canvas {
   filter: sepia(0.15) saturate(0.9) contrast(0.98);
 }
 
-/* Zoom controls */
-.game-map .leaflet-control-zoom {
+/* Zoom controls (MapLibre NavigationControl) */
+.game-map .maplibregl-ctrl-group {
   border: 1px solid var(--border) !important;
   box-shadow: none !important;
+  background: var(--bg-2);
 }
 
-.game-map .leaflet-control-zoom a {
+.game-map .maplibregl-ctrl-group button {
   background-color: var(--bg-2);
   color: var(--fg);
   border-color: var(--border);
@@ -37,12 +41,21 @@
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
-.game-map .leaflet-control-zoom a:hover {
+.game-map .maplibregl-ctrl-group button:hover {
   background-color: var(--accent-soft);
   color: var(--accent);
 }
 
-.game-map .leaflet-control-attribution {
+/* Tint the default MapLibre zoom icons (SVGs use currentColor where possible) */
+.game-map .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(0.85);
+}
+
+[data-theme='light'] .game-map .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: none;
+}
+
+.game-map .maplibregl-ctrl-attrib {
   background-color: rgba(7, 9, 10, 0.7);
   color: var(--fg-muted);
   font-family: var(--font-mono-label);
@@ -51,11 +64,11 @@
   padding: 2px 6px;
 }
 
-[data-theme='light'] .game-map .leaflet-control-attribution {
+[data-theme='light'] .game-map .maplibregl-ctrl-attrib {
   background-color: rgba(243, 239, 230, 0.75);
 }
 
-.game-map .leaflet-control-attribution a {
+.game-map .maplibregl-ctrl-attrib a {
   color: var(--fg);
 }
 
@@ -87,12 +100,12 @@
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Line fade-in on result screens */
-.round-result-map .leaflet-overlay-pane,
-.final-summary-map .leaflet-overlay-pane {
-  animation: line-reveal 0.6s ease-out 0.3s both;
-}
-
+/* Line fade-in on result screens.
+   Lines are now rendered into the WebGL canvas (no DOM overlay pane to
+   target). Animating opacity at the canvas level would fade the entire
+   map; proper fix is to animate the layer's `line-opacity` paint property
+   from JS. Disabled until that lands — tracked in
+   docs/maplibre-globe-migration.md. */
 @keyframes line-reveal {
   from { opacity: 0; }
   to   { opacity: 1; }

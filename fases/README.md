@@ -5,7 +5,7 @@
 | Capa | Tecnología | Coste |
 |------|-----------|-------|
 | Frontend | React + Vite + TypeScript | 0$ |
-| Mapa | Leaflet + OpenStreetMap | 0$ |
+| Mapa | MapLibre GL v5 (proyección globe) + CARTO vector basemaps | 0$ |
 | Escenas | Mapillary API v4 | 0$ |
 | Backend | Node.js + Express + TypeScript | 0$ |
 | DB (fases 0-3) | JSON files + localStorage | 0$ |
